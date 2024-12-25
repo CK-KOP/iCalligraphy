@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_registered_styles.css') }}">
+    <title>墨韵 - 注册</title>
+</head>
+<body>
+    <main>
+        <h1>注册</h1>
+        <form id="register-form">
+            <label for="username">用户名：</label>
+            <input type="text" id="username" name="username" placeholder="请设置用户名" required>
+            
+            <label for="password">密码：</label>
+            <input type="password" id="password" name="password" placeholder="请设置密码" required>
+            
+            <label for="confirm-password">确认密码：</label>
+            <input type="password" id="confirm-password" name="confirm-password" placeholder="请再次输入密码" required>
+            
+            <button type="submit">注册</button>
+            
+            <div class="form-footer">
+                <a href="{{ url_for('login') }}" class="form-link">已有账号？立即登录</a>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert('两次密码输入不一致，请重新输入');
+                return;
+            }
+
+            fetch('/check_register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const parentWindow = window.parent;
+                    parentWindow.location.reload();
+                    window.location.href = '{{ url_for("main_page") }}';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('注册错误:', error);
+                alert('注册失败，请稍后再试');
+            });
+
+        });
+    </script>
+</body>
+</html>

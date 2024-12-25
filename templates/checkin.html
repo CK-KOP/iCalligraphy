@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>书法打卡</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+                min-height: 100vh;
+                padding: 2rem;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                color: #333;
+                background-image: url('{{ url_for("static", filename="images/backgrounds/white_paper.jpg") }}');
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+                height: calc(100vh - 4rem); /* 设置容器高度为视窗高度减去padding */
+            }
+
+            .left-section {
+                background: white;
+                border-radius: 20px;
+                padding: 2rem;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                display: flex;
+                flex-direction: column;
+                height: 100%; /* 确保左侧区域填充整个高度 */
+            }
+
+            .system-content {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .char-container {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .today-char {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .char-description {
+                color: #666;
+            }
+
+            .char-image {
+                width: 100%;
+                height: 200px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .char-image img, .char-image svg {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+
+            .system-content img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 10px;
+                margin: 1rem 0;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .upload-section {
+                margin-top: auto;
+            }
+
+            .file-input-container {
+                position: relative;
+                margin-bottom: 1rem;
+            }
+
+            .file-input-label {
+                display: block;
+                padding: 1rem;
+                background: #f8f9fa;
+                border: 2px dashed #dee2e6;
+                border-radius: 10px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .file-input-label:hover {
+                background: #e9ecef;
+                border-color: #adb5bd;
+            }
+
+            input[type="file"] {
+                position: absolute;
+                width: 0;
+                height: 0;
+                opacity: 0;
+            }
+
+            button {
+                width: 100%;
+                padding: 1rem;
+                background: #4a90e2;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+            button:hover {
+                background: #357abd;
+            }
+
+            .right-section {
+                background: white;
+                border-radius: 20px;
+                padding: 2rem;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                display: flex;
+                flex-direction: column;
+                height: 100%; /* 确保右侧区域填充整个高度 */
+                overflow: hidden; /* 防止内容溢出 */
+            }
+
+            .right-section h2 {
+                margin-bottom: 1.5rem;
+                color: #333;
+                font-size: 1.5rem;
+                flex-shrink: 0; /* 防止标题被压缩 */
+            }
+
+            #checkinRecordsList {
+                list-style: none;
+                display: grid;
+                gap: 1.5rem;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                overflow-y: auto; /* 添加垂直滚动 */
+                padding-right: 1rem; /* 为滚动条留出空间 */
+                flex-grow: 1; /* 允许列表占据剩余空间 */
+            }
+
+            .record-card {
+                background: #fff;
+                border-radius: 15px;
+                padding: 1.5rem;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                transition: transform 0.3s ease;
+            }
+
+            .record-card img {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                border-radius: 10px;
+                margin-bottom: 1rem;
+            }
+
+            .record-info {
+                color: #666;
+                font-size: 0.9rem;
+            }
+
+            /* 自定义滚动条样式 */
+            #checkinRecordsList::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            #checkinRecordsList::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 3px;
+            }
+
+            #checkinRecordsList::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 3px;
+            }
+
+            #checkinRecordsList::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    grid-template-columns: 1fr;
+                    height: auto;
+                }
+                
+                .right-section {
+                    height: 600px; /* 在移动端给右侧区域一个固定高度 */
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="left-section">
+                <div class="system-content">
+                    <div class="char-container">
+                        <div class="today-char">今日打卡字: <strong id="clockChar"></strong></div>
+                        <p id="charDescription" class="char-description"></p>
+                    </div>
+                    <div id="charImage" class="char-image">
+                        <!-- 这里将根据返回类型显示SVG或图片 -->
+                    </div>
+                </div>
+                <div class="upload-section">
+                    <div class="file-input-container">
+                        <label class="file-input-label" for="imageUpload">
+                            <span>点击或拖拽上传您的作品</span>
+                        </label>
+                        <input type="file" id="imageUpload" accept="image/*">
+                    </div>
+                    <button id="uploadButton">提交打卡</button>
+                </div>
+            </div>
+            <div class="right-section">
+                <h2>打卡记录</h2>
+                <ul id="checkinRecordsList"></ul>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const userId = {{ user_id }};  // 从后端模板变量获取
+                const uploadButton = document.getElementById('uploadButton');
+                const imageUpload = document.getElementById('imageUpload');
+                const checkinRecordsList = document.getElementById('checkinRecordsList');
+                const clockCharElement = document.getElementById('clockChar');
+                const charDescriptionElement = document.getElementById('charDescription');
+                const charImageElement = document.getElementById('charImage');
+        
+                // 获取随机字
+                function getRandomChar() {
+                    fetch('/get-random-char')
+                        .then(response => response.json())
+                        .then(data => {
+                            // 更新字和描述
+                            clockCharElement.textContent = data.image_data.character;
+                            charDescriptionElement.textContent = data.image_data.description;
+                            
+                            // 根据类型显示SVG或图片
+                            charImageElement.innerHTML = ''; // 清空现有内容
+                            if (data.image_data.is_svg) {
+                                charImageElement.innerHTML = data.image_data.svg;
+                            } else {
+                                const img = document.createElement('img');
+                                img.src = data.image_data.image_url;
+                                img.alt = '示例字';
+                                charImageElement.appendChild(img);
+                            }
+                        })
+                        .catch(error => console.error('获取随机字出错:', error));
+                }
+        
+                function getCheckinRecords() {
+                    fetch(`/checkin/records?user_id=${userId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            checkinRecordsList.innerHTML = '';
+                            data.forEach(record => {
+                                const li = document.createElement('li');
+                                li.className = 'record-card';
+                                
+                                const img = document.createElement('img');
+                                img.src = `/static/${record.img_filepath}`;
+                                img.alt = '打卡作品';
+        
+                                const info = document.createElement('div');
+                                info.className = 'record-info';
+                                info.textContent = `打卡字: ${record.clock_char} | ${record.creation_date}`;
+        
+                                li.appendChild(img);
+                                li.appendChild(info);
+                                checkinRecordsList.appendChild(li);
+                            });
+                        })
+                        .catch(error => console.error('获取打卡记录出错:', error));
+                }
+        
+                uploadButton.addEventListener('click', function() {
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    formData.append('clock_char', clockCharElement.textContent);
+                    formData.append('img_file', imageUpload.files[0]);
+        
+                    fetch('/checkin/upload', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('上传打卡失败');
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.message === 'Upload successful') {
+                                getCheckinRecords(); // 更新打卡记录
+                                imageUpload.value = ''; // 清空文件输入
+                                getRandomChar(); // 获取新的随机字
+                            }
+                        })
+                        .catch(error => console.error('上传出错:', error));
+                });
+        
+                // 页面加载时获取随机字和打卡记录
+                getRandomChar();
+                getCheckinRecords();
+            });
+        </script>
+    </body>
+</html>

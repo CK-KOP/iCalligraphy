@@ -1,0 +1,369 @@
+// 全局样式
+body {
+	font-family: Arial, sans-serif;
+    background-size: cover;   /* 背景图填充整个页面 */
+    background-position: center; /* 背景图居中 */
+    background-repeat: no-repeat; /* 避免背景重复 */
+    background-attachment: fixed; /* 背景固定，滚动时不动 */
+	margin: 0;
+	padding: 0;
+	color: #333;
+}
+
+// 导航栏
+.navbar {
+	background-color: #f5f5f5;
+	padding: 10px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	img {
+		height: 50px;
+	}
+
+	div {
+		a {
+			text-decoration: none;
+			color: #333;
+			margin: 0 10px;
+
+			&:hover {
+				color: #4285f4;
+			}
+		}
+	}
+}
+
+// 容器
+.container {
+	max-width: 1000px;
+	margin: 40px auto;
+	background-color: transparent; // 设置白色背景并加透明度
+	padding: 20px;
+	border-radius: 0; // 增加圆角
+	box-shadow: none; // 添加阴影效果
+}
+
+// 步骤容器
+.step-container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 20px;
+
+	.step {
+		flex: 1;
+		background-color: transparent;
+		padding: 15px;
+		min-width: 300px;
+
+		h3 {
+			margin: 10px 0 15px 0;
+		}
+
+		p {
+			font-size: 16px;
+			color: #000;
+			margin: 5px 0;
+		}
+	}
+}
+
+// 标签样式
+label {
+	margin-right: 20px;
+}
+
+.file-input {
+	margin-top: 15px;
+	display: flex;
+	align-items: center;
+
+	input[type="file"] {
+		display: none;
+	}
+
+	label {
+		padding: 8px 16px;
+		background-color: #4285f4;
+		color: #fff;
+		border-radius: 4px;
+		cursor: pointer;
+		margin-right: 10px;
+
+		&:hover {
+			background-color: #3071e8;
+		}
+	}
+
+	span {
+		color: #888;
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		display: inline-block;
+		vertical-align: middle;
+	}
+}
+
+// 分割线
+hr {
+	border: 0;
+	border-top: 1px solid black;
+	margin: 20px 0 50px 0;
+}
+
+// 操作和结果展示区域
+.actions-results {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+// 开始评定按钮
+.btn-align {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+button {
+	white-space: nowrap;
+	padding: 10px 30px;
+	background-color: #4285f4;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 16px;
+
+	&:hover {
+		background-color: #3071e8;
+	}
+}
+
+// 结果展示容器
+.results-container {
+	width: 100%;
+	max-width: 800px;
+}
+
+// 相似度结果
+.similarity-result {
+	display: flex;
+	align-items: center;
+	margin-bottom: 20px;
+
+	.label-title {
+		font-size: 18px;
+		font-weight: bold;
+		margin-right: 10px;
+	}
+
+	span {
+		font-size: 24px;
+		color: #ff5722;
+	}
+}
+
+// 大模型字形评定建议
+.model-suggestion {
+	margin-bottom: 20px;
+
+	.label-title {
+		font-size: 18px;
+		font-weight: bold;
+		margin-bottom: 10px;
+	}
+
+	.suggestion-text {
+		border: 1px solid #ccc;
+		padding: 10px;
+		min-height: 200px;
+		line-height: 1.5;
+		background-color: #f9f9f9;
+		white-space: pre-wrap;
+	}
+}
+
+/* 模态框样式优化 */
+.modal {
+    position: fixed; /* 固定定位 */
+    top: 50%; /* 垂直居中 */
+    left: 50%; /* 水平居中 */
+    transform: translate(-50%, -50%); /* 平移修正居中 */
+    width: 80%; /* 调整宽度 */
+    max-width: 900px; /* 最大宽度 */
+    max-height: 90%; /* 增加最大高度 */
+    overflow-y: auto; /* 启用纵向滚动 */
+    background-color: #fff; /* 背景色 */
+    padding: 20px; /* 内边距 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影 */
+    border-radius: 8px; /* 圆角 */
+    z-index: 1000; /* 保证模态框在最顶层 */
+}
+
+.modal-content {
+    display: flex; /* 使用弹性布局 */
+    flex-direction: column; /* 垂直排列 */
+    gap: 5px; /* 增加内容间距 */
+    font-size: 16px; /* 字体大小 */
+    line-height: 1.5; /* 行高 */
+    color: #333; /* 字体颜色 */
+}
+
+/* 搜索框优化 */
+.modal-content input {
+    padding: 12px; 
+    font-size: 18px; /* 提高字体大小 */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f7f7f7; /* 设置背景色 */
+    margin-bottom: 20px; /* 增加搜索框与下方元素的间距 */
+}
+
+/* 下拉框样式优化 */
+.modal-content select {
+    padding: 12px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f7f7f7; /* 设置背景色 */
+    margin-bottom: 20px; /* 增加下拉框与其他元素的间距 */
+}
+
+/* 关闭按钮样式 */
+#close-modal-x {
+    position: absolute; /* 定位到绝对位置 */
+    top: 10px; /* 距离顶部10px */
+    right: 10px; /* 距离右侧10px */
+    background: none; /* 不显示背景 */
+    border: none; /* 无边框 */
+    font-size: 20px; /* 设置字体大小 */
+    cursor: pointer; /* 设置鼠标指针 */
+}
+
+// 集字网格布局优化
+.collection-grid {
+    display: grid; // 使用网格布局
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); // 动态列数，最小宽度150px
+    gap: 20px; // 增加卡片间距
+    padding: 10px; // 内边距
+
+    .collection-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); // 添加阴影
+        overflow: hidden; // 确保内容不会溢出
+        text-align: center;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        .svg-container {
+            height: 100px; // 固定高度，便于布局
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; // 防止SVG超出容器
+            margin-bottom: 10px; // 增加间距
+
+            svg,
+            img {
+                max-width: 100%;
+                max-height: 100%; // 保持图片比例
+                object-fit: contain; // 避免图片拉伸变形
+            }
+        }
+
+        .collection-card-details {
+            font-size: 14px; // 提高字体大小
+            color: #333;
+            line-height: 1.4; // 增加行距
+            text-align: left; // 左对齐
+            word-wrap: break-word; // 强制长单词换行
+        }
+
+        &.selected {
+            border: 2px solid #4285f4; // 高亮边框
+            background-color: #f0f6ff; // 添加背景色
+        }
+    }
+
+    &::-webkit-scrollbar {
+        width: 8px; // 滚动条宽度
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #ccc; // 滚动条颜色
+        border-radius: 4px; // 圆角
+
+        &:hover {
+            background-color: #999; // 滚动条悬停颜色
+        }
+    }
+}
+
+
+
+
+.image-comparison {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+
+	.comparison-wrapper {
+		display: flex;
+		gap: 40px; // 增加图片容器之间的间距
+		align-items: flex-start;
+
+		.uploaded-image-container, .library-image-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			width: 420px; // 确保两边容器宽度一致
+			min-height: 450px; // 设置最小高度，避免图片过小时不一致
+			border: 1px solid #ddd;
+			padding: 10px;
+			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+			background-color: #f9f9f9;
+			border-radius: 5px;
+
+			.image-label {
+				font-weight: bold;
+				margin-bottom: 15px; // 增加标题与图片的间距
+				font-size: 1.2em; // 调整标题文字大小
+			}
+
+			img {
+				width: 100%; // 图片宽度占满容器
+				height: auto; // 保持图片比例
+				max-width: 400px; // 可选，设置图片最大宽度
+				max-height: 400px; // 可选，设置图片最大高度
+				object-fit: contain; // 保持图片比例缩放，避免拉伸变形
+				border: 1px solid #ddd;
+				border-radius: 5px; // 增加圆角效果
+				padding: 10px;
+				box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); // 添加阴影
+				background-color: #fff; // 背景颜色
+			}
+		}
+	}
+}
+
+// 适配小屏幕
+@media (max-width: 600px) {
+	.modal {
+		width: 95%;
+		max-width: 90%;
+	}
+
+	.collection-grid {
+		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); // 调整最小宽度
+	}
+}

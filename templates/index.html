@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="墨韵书法学习平台">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_styles.css') }}">
+    <title>墨韵 - 首页</title>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='images/moyun.png') }}" 
+                     alt="墨韵logo" 
+                     width="120" 
+                     height="60" 
+                     loading="lazy">
+            </a>
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="{{ url_for('main_page') }}" data-page="main" class="nav-link active">首页</a></li>
+                    <li><a href="{{ url_for('img_ocr') }}" data-page="recognition" class="nav-link">书法识别</a></li>
+                    <li><a href="{{ url_for('img_evaluate_index') }}" data-page="evaluate" class="nav-link">字形评定</a></li>
+                    <li><a href="{{ url_for('calligraphy_search') }}" data-page="search" class="nav-link">书法检索</a></li>
+                    <li><a href="{{ url_for('copybook_creation') }}" data-page="copybook" class="nav-link">创建字帖</a></li>
+                    <li><a href="{{ url_for('forum') }}" data-page="forum" class="nav-link">交流论坛</a></li>
+                </ul>
+            </nav>
+            <div class="user-section">
+                <div class="auth-buttons">
+                    <a href="{{ url_for('login') }}" class="btn-login" data-page="login" target="contentFrame">登录</a>
+                    <a href="{{ url_for('registered') }}" class="btn-register" data-page="register" target="contentFrame">注册</a>
+                </div>
+                <div class="user-profile hidden">
+                    <button class="profile-trigger" aria-expanded="false">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" 
+                             alt="用户头像" 
+                             class="avatar" 
+                             id="user-avatar">
+                    </button>
+                    <div class="profile-dropdown hidden">
+                        <nav class="dropdown-nav">
+                            <button type="button" class="dropdown-item btn-info" id="btn-person-info">个人信息</button>
+                            <button type="button" class="dropdown-item btn-logout">退出登录</button>
+                        </nav>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <iframe name="contentFrame" 
+                id="contentFrame" 
+                src="{{ url_for('main_page') }}" 
+                title="内容展示区"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-top-navigation">
+        </iframe>
+    </main>
+
+    <script type="module">
+        // 用户认证状态管理
+        class AuthManager {
+            constructor() {
+                this.authBtn = document.querySelector('.auth-buttons'); // 登录/注册按钮
+                this.userProfile = document.querySelector('.user-profile'); // 用户信息显示区域
+                this.avatar = document.getElementById('user-avatar'); // 头像
+                this.dropdownMenu = document.querySelector('.profile-dropdown'); // 下拉菜单
+                this.init();
+            }
+
+            init() {
+                this.checkAuthStatus();
+                this.bindEvents();
+            }
+
+            checkAuthStatus() {
+                // 向后端请求用户认证状态
+                fetch('/get_user_data', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.user) {
+                        this.showUserProfile(data.user);
+                    } else {
+                        this.showLoginRegisterButtons();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking auth status:', error);
+                    this.showLoginRegisterButtons();
+                });
+            }
+
+            showUserProfile(user) {
+                // 登录后隐藏登录注册按钮，显示用户信息
+                this.authBtn.style.display = 'none'; // 隐藏登录/注册按钮
+                this.userProfile.style.display = 'block'; // 显示用户信息区域
+                
+                // 使用返回的 user 数据来设置头像路径
+                const newAvatarPath = `/avatars/${user.username}`;  // 使用 username 作为头像路径的一部分
+                this.avatar.src = newAvatarPath + '?t=' + new Date().getTime();  // 防止缓存，添加时间戳
+            }
+
+            showLoginRegisterButtons() {
+                // 未登录时显示登录/注册按钮，隐藏用户信息
+                this.authBtn.style.display = 'flex'; // 显示登录/注册按钮
+                this.userProfile.style.display = 'none'; // 隐藏用户信息区域
+            }
+
+            bindEvents() {
+                const logoutBtn = document.querySelector('.btn-logout');
+                logoutBtn?.addEventListener('click', () => this.handleLogout());
+
+                document.addEventListener('click', (e) => {
+                    if (!this.userProfile.contains(e.target)) {
+                        this.dropdownMenu.style.display = 'none';
+                    }
+                });
+
+                this.userProfile.addEventListener('click', () => {
+                    this.dropdownMenu.style.display = this.dropdownMenu.style.display === 'none' ? 'block' : 'none';
+                });
+            }
+
+            async handleLogout() {
+                try {
+                    const response = await fetch('/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        console.error('Logout failed:', data.message);
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+        }
+
+
+        // 在NavigationManager类中添加检查登录的功能
+        class NavigationManager {
+            constructor() {
+                this.navLinks = document.querySelectorAll('.nav-link');
+                this.contentFrame = document.getElementById('contentFrame');
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+            }
+
+            // 添加检查登录状态的方法
+            async checkLoginStatus() {
+                try {
+                    const response = await fetch('/get_user_data', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    return data.success;
+                } catch (error) {
+                    console.error('检查登录状态失败:', error);
+                    return false;
+                }
+            }
+
+            // 显示提示信息
+            showToast(message) {
+                const toast = document.createElement('div');
+                toast.style.position = 'fixed';
+                toast.style.top = '20px';
+                toast.style.right = '20px';
+                toast.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                toast.style.color = 'white';
+                toast.style.padding = '1rem 2rem';
+                toast.style.borderRadius = '0.5rem';
+                toast.style.zIndex = '1000';
+                toast.textContent = message;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 300);
+                }, 3000);
+            }
+
+            async handleNavClick(e) {
+                e.preventDefault();
+                const link = e.currentTarget;
+                
+                // 检查登录状态
+                const isLoggedIn = await this.checkLoginStatus();
+                if (!isLoggedIn) {
+                    this.showToast('请先登录后再访问此功能');
+                    return;
+                }
+                
+                // 已登录，执行导航
+                this.navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                this.contentFrame.src = link.href;
+            }
+
+            bindEvents() {
+                this.navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => this.handleNavClick(e));
+                });
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            new AuthManager();
+            new NavigationManager();
+            const personInfoButton = document.getElementById('btn-person-info');
+            const iframe = document.getElementById('contentFrame');  // 获取目标 iframe
+
+            if (personInfoButton) {
+                personInfoButton.addEventListener('click', () => {
+                    // 将 iframe 的 src 属性修改为个人信息页面的 URL
+                    iframe.src = '/person_information';  // 这里的路径可以使用 url_for() 或者直接填写 URL
+                });
+            }
+        });
+    </script>
+</body>
+</html>

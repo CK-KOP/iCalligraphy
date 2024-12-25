@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>墨韵书法 - 首页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-size: cover;   /* 背景图填充整个页面 */
+            background-position: center; /* 背景图居中 */
+            background-repeat: no-repeat; /* 避免背景重复 */
+            background-attachment: fixed; /* 背景固定，滚动时不动 */
+            background-image: url('{{ url_for("static", filename="images/backgrounds/all_background.jpg") }}');
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .hero-section p {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .features-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .features-row {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .features-row-top {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .features-row-bottom {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 900px; /* 让底部两个卡片不会太宽 */
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card h2 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #2196F3;
+        }
+
+        .learn-more {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: background 0.3s ease;
+        }
+
+        .learn-more:hover {
+            background: #1976D2;
+        }
+
+        @media (max-width: 1024px) {
+            .features-row-top {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .features-row-bottom {
+                grid-template-columns: 1fr;
+                max-width: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .features-row-top,
+            .features-row-bottom {
+                grid-template-columns: 1fr;
+                max-width: 450px;
+                margin: 0 auto;
+            }
+        }
+
+        /* 修改Toast样式，确保动画持续时间正确 */
+        .toast {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .toast.fadeOut {
+            animation: fadeOut 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="hero-section">
+        <h1>欢迎来到墨韵书法学习平台</h1>
+        <p>探索书法艺术的数字化学习体验，让传统与科技完美融合</p>
+    </div>
+
+    <div class="features-container">
+        <div class="features-row features-row-top">
+            <div class="feature-card" >
+                <div class="feature-icon">📝</div>
+                <h2>书法作品智能识别</h2>
+                <p>运用先进的AI技术，精确识别古籍文字，支持多种识别模式和校对功能，让古籍文字转化更加便捷。</p>
+                <a href="/img_ocr" class="learn-more">开始使用</a>
+            </div>
+
+            <div class="feature-card" >
+                <div class="feature-icon">🎯</div>
+                <h2>大模型字形评定</h2>
+                <p>基于人工智能的智能评定系统，提供专业的字形分析和改进建议，帮助您提升书法水平。</p>
+                <a href="/img_evaluate_index" class="learn-more">开始评定</a>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h2>书法字体检索</h2>
+                <p>强大的书法资源搜索引擎，轻松查找毛笔字体和书法作品，探索书法艺术的无限可能。</p>
+                <a href="/calligraphy_search" class="learn-more">开始搜索</a>
+            </div>
+        </div>
+
+        <div class="features-row features-row-bottom">
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h2>创建生成字帖</h2>
+                <p>个性化字帖制作工具，将您收藏的汉字和创作组合成专属字帖，支持多种导出格式。</p>
+                <a href="/copybook_creation" class="learn-more">制作字帖</a>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h2>交流论坛</h2>
+                <p>加入我们的书法爱好者社区，分享经验、讨论技巧、展示作品，与志同道合者共同进步。</p>
+                <a href="/forum" class="learn-more">参与讨论</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toast提示状态管理
+        const toastManager = {
+            canShow: true,
+            reset() {
+                this.canShow = true;
+            }
+        };
+
+        // 显示提示信息的函数
+        function showToast(message) {
+            if (!toastManager.canShow) return;
+            
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            // 3秒后开始淡出动画
+            setTimeout(() => {
+                toast.classList.add('fadeOut');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                    // 重置toast状态
+                    toastManager.reset();
+                }, 300);
+            }, 3000);
+
+            // 设置标志位，防止重复显示
+            toastManager.canShow = false;
+        }
+
+        // 检查登录状态
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/get_user_data', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                return data.success;
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+                return false;
+            }
+        }
+
+        // 更新导航栏选中状态
+        function updateNavigation(path) {
+            const parentNavLinks = window.parent.document.querySelectorAll('.nav-link');
+            parentNavLinks.forEach(link => link.classList.remove('active'));
+
+            const pathToNavMap = {
+                '/img_ocr': 'recognition',
+                '/img_evaluate_index': 'evaluate',
+                '/calligraphy_search': 'search',
+                '/copybook_creation': 'copybook',
+                '/forum': 'forum'
+            };
+
+            const navId = pathToNavMap[path];
+            if (navId) {
+                const targetLink = window.parent.document.querySelector(`[data-page="${navId}"]`);
+                if (targetLink) {
+                    targetLink.classList.add('active');
+                }
+            }
+        }
+
+        // 处理导航
+        async function handleNavigation(url) {
+            const isLoggedIn = await checkLoginStatus();
+            
+            if (!isLoggedIn) {
+                showToast('请先登录后再访问此功能');
+                return;
+            }
+
+            updateNavigation(url);
+            window.location.href = url;
+        }
+
+        // DOM加载完成后的事件处理
+        document.addEventListener('DOMContentLoaded', () => {
+            // 为所有链接添加事件处理
+            document.querySelectorAll('a.learn-more').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const url = link.getAttribute('href');
+                    handleNavigation(url);
+                });
+            });
+
+            // 为卡片添加事件处理
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('a')) {
+                        const link = card.querySelector('a.learn-more');
+                        if (link) {
+                            e.preventDefault();
+                            const url = link.getAttribute('href');
+                            handleNavigation(url);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

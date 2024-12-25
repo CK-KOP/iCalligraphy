@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous" />
+        <title>书法识别</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-image: url('{{ url_for("static", filename="images/backgrounds/white_paper.jpg") }}');
+                background-size: cover;   /* 背景图填充整个页面 */
+                background-position: center; /* 背景图居中 */
+                background-repeat: no-repeat; /* 避免背景重复 */
+                background-attachment: fixed; /* 背景固定，滚动时不动 */
+                margin: 0;
+                padding: 0;
+                color: #333;
+            }
+            .container {
+                display: grid;
+                grid-template-columns: 45% 45%; /* 两列 */
+                gap: 20px; /* 两列之间的间距 */
+                margin-top: 50px;
+            }
+            .left,
+            .right {
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            .form-group {
+                margin-bottom: 15px;
+            }
+            label {
+                display: inline-block;
+                width: 100px;
+                font-size: 18px;
+                font-weight: normal;
+                color: #333333;
+            }
+            input[type="text"] {
+                width: 300px;
+                padding: 5px;
+                font-size: 14px;
+            }
+            p {
+                font-size: 18px;
+                font-weight: normal;
+                color: #666;
+            }
+            .image-option-container {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                margin-top: 20px;
+            }
+            .image-option {
+                text-align: center;
+            }
+            .image-option img {
+                width: 200px;
+                height: 300px;
+                object-fit: cover;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                transition: transform 0.3s ease;
+            }
+            .image-option img:hover {
+                transform: scale(1.1);
+            }
+            .image-option input {
+                margin-top: 10px;
+            }
+            hr {
+                margin-top: 30px;
+                margin-bottom: 30px;
+            }
+            input[type="radio"] {
+                margin-right: 10px;
+            }
+            .start-button {
+                margin-top: -20px;
+                padding: 10px 20px;
+                font-size: 16px;
+                background-color: #c1c4c1;
+                color: white;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+                margin-left: 13%;
+                height: 50px;
+            }
+            .start-button:hover {
+                background-color: #838583;
+            }
+            .upload-form {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .button {
+                padding: 10px 20px;
+                font-size: 16px;
+                background-color: #c1c4c1;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .button:hover {
+                background-color: #838583;
+            }
+            #file-name {
+                margin-left: 20px;
+                font-size: 14px;
+                color: #555;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="left">
+                <h2>第一步：选择文件</h2>
+                <p>请选择单页图片，大小不超过2MB，单字像素在45px以上，支持jpg、png、tiff、gif等格式，不支持黑底白字。</p>
+                <form id="upload-form" method="POST" enctype="multipart/form-data">
+                    <div class="upload-container">
+                        <input type="file" name="file" id="file-upload" accept=".jpg,.png,.tiff,.gif" style="display: none" />
+                    </div>
+                    <!-- 上传按钮 -->
+                    <button type="button" class="button" onclick="triggerFileUpload()">上传文件</button>
+                    <span id="file-name">未选择文件</span>
+                </form>
+
+                <hr />
+                <h2>第二步：填写文件信息</h2>
+                <form>
+                    <div class="form-group">
+                        <label for="source">作品来源：</label>
+                        <input type="text" id="source" name="source" placeholder="请输入作品来源" />
+                    </div>
+                    <div class="form-group">
+                        <label for="author">作者信息：</label>
+                        <input type="text" id="author" name="author" placeholder="请输入作者信息" />
+                    </div>
+                    <div class="form-group">
+                        <label for="style">字体风格：</label>
+                        <input type="text" id="style" name="style" placeholder="请输入字体风格" />
+                    </div>
+                </form>
+            </div>
+
+            <div class="right">
+                <h2>第三步：选择版面</h2>
+                <div class="image-option-container">
+                    <div class="image-option">
+                        <img src="{{ url_for('static', filename='imgs/vertical_1.png') }}" alt="单栏" />
+                        <br />
+                        <input type="radio" name="layout" id="layout1" value="layout1" />
+                        <label for="layout1">单栏</label>
+                    </div>
+                    <div class="image-option">
+                        <img src="{{ url_for('static', filename='imgs/vertical_2.png') }}" alt="双栏" />
+                        <br />
+                        <input type="radio" name="layout" id="layout2" value="layout2" />
+                        <label for="layout2">双栏</label>
+                    </div>
+                    <div class="image-option">
+                        <img src="{{ url_for('static', filename='imgs/vertical_3.png') }}" alt="三栏" />
+                        <br />
+                        <input type="radio" name="layout" id="layout3" value="layout3" />
+                        <label for="layout3">三栏</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="start-button" onclick="startRecognition()">开始智能识别</button>
+
+        <script>
+            function triggerFileUpload() {
+                const fileInput = document.getElementById("file-upload");
+
+                // 打开文件选择框
+                fileInput.click();
+
+                // 监听文件选择框的变化，选择文件后自动显示文件名
+                fileInput.onchange = function () {
+                    if (fileInput.files.length > 0) {
+                        document.getElementById("file-name").textContent = fileInput.files[0].name;
+                    }
+                };
+            }
+            function startRecognition() {
+                const fileInput = document.getElementById("file-upload");
+                const sourceInput = document.getElementById("source");
+                const authorInput = document.getElementById("author");
+                const styleInput = document.getElementById("style");
+
+                // 验证文件是否上传
+                if (fileInput.files.length === 0) {
+                    alert("请先上传文件");
+                    return;
+                }
+                const uploadedFileName = fileInput.files[0].name;
+
+                // 验证作品来源是否填写
+                if (!sourceInput.value.trim()) {
+                    alert("请填写作品来源");
+                    sourceInput.focus();
+                    return;
+                }
+
+                // 验证作者信息是否填写
+                if (!authorInput.value.trim()) {
+                    alert("请填写作者信息");
+                    authorInput.focus();
+                    return;
+                }
+
+                // 验证字体风格是否填写
+                if (!styleInput.value.trim()) {
+                    alert("请填写字体风格");
+                    styleInput.focus();
+                    return;
+                }
+
+                // 获取选中的版面
+                const selectedLayout = document.querySelector('input[name="layout"]:checked');
+                if (!selectedLayout) {
+                    alert("请先选择版面");
+                    return;
+                }
+
+                // 准备发送的数据
+                const formData = {
+                    img_name: uploadedFileName,
+                    work_source: sourceInput.value.trim(),
+                    work_author: authorInput.value.trim(),
+                    work_style: styleInput.value.trim(),
+                    work_layout: selectedLayout.value, // 传递选中的版面信息
+                    timestamp: new Date().getTime(),
+                };
+
+                // 使用 fetch 发送 POST 请求到后端路由
+                fetch("/upload_work_info", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        if (data.status === "success") {
+                            alert("信息上传成功！");
+
+                            // 获取表单
+                            const form = document.getElementById("upload-form");
+
+                            // 创建时间戳输入字段并添加到表单
+                            console.log(formData.timestamp);
+                            const timestampInput = document.createElement("input");
+                            timestampInput.type = "hidden";
+                            timestampInput.name = "timestamp";
+                            timestampInput.value = formData.timestamp;
+                            form.appendChild(timestampInput);
+
+                            // 提交表单到 img_ocr 路由
+                            form.submit();
+                        } else {
+                            alert(data.message || "上传失败，请稍后再试！");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        alert("网络错误或服务器不可用，请稍后再试！");
+                    });
+            }
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-ep+dxp/oz2RKF89ALMPGc7Z89QFa32C8Uv1A3TcEK8sMzXVysblLA3+eJWTzPJzT" crossorigin="anonymous"></script>
+    </body>
+</html>

@@ -1,0 +1,93 @@
+@charset "UTF-8";
+/* 通用样式 */
+body {
+  font-family: "Arial", sans-serif;
+  background: #f4f7fc; /* 采用浅灰色背景 */
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+main {
+  background-color: white;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px; /* 最大宽度适应大屏 */
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 2.5em;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  font-size: 1em;
+  color: #333;
+  text-align: left;
+}
+
+input {
+  padding: 12px;
+  font-size: 1em;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+input:focus {
+  border-color: #6e7bff;
+  box-shadow: 0 0 5px rgba(110, 123, 255, 0.5);
+}
+
+button {
+  padding: 12px;
+  font-size: 1.2em;
+  color: white;
+  background-color: #6e7bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: #8a5cf7;
+}
+
+.form-footer {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.form-link {
+  font-size: 1em;
+  color: #6e7bff;
+  text-decoration: none;
+}
+
+.form-link:hover {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  main {
+    max-width: 90%; /* 移动设备适应屏幕 */
+  }
+}/*# sourceMappingURL=login_registered_styles.css.map */

@@ -1,0 +1,311 @@
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding-bottom: 0;
+  }
+  
+  .item {
+    flex: 1 1 45%;
+    margin: 10px;
+    cursor: pointer;
+    min-width: 300px;
+    max-width: 45%;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+    padding: 10px;
+  }
+  .item:hover {
+    box-shadow: 2px 2px 8px grey;
+  }
+  .item .i-head {
+    cursor: pointer;
+    height: 32px;
+    line-height: 32px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ebebeb;
+  }
+  .item .i-head a:hover {
+    color: #b68856;
+  }
+  .item .i-body {
+    padding: 12px;
+    line-height: 24px;
+  }
+  
+  @media (max-width: 900px) {
+    x .content {
+      width: 100%;
+    }
+    .item {
+      flex: 1 1 100%;
+      min-width: 100%;
+    }
+  }
+  .container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  
+  .mode-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+  }
+  .mode-container .mode-option {
+    margin-right: 20px;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .button-container .btn-clear {
+    background-color: #ddd;
+    color: #333;
+    margin-right: 10px;
+    border: none;
+  }
+  .button-container .btn-submit {
+    background-color: #b68856;
+    color: #fff;
+    border: none;
+  }
+  .button-container .btn-clear:hover, .button-container .btn-submit:hover {
+    opacity: 0.9;
+  }
+  
+  .no-border-button {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .no-border-button-save {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .no-border-button img {
+    opacity: 0.4;
+  }
+  .no-border-button-save img {
+    opacity: 0.75;
+  }
+  .no-border-button .no-border-button:focus {
+    outline: none;
+  }
+  
+  .content {
+    max-width: 960px;
+    margin: 15px auto;
+    padding: 0 15px;
+    flex-grow: 1;
+    margin-bottom: 15px;
+  }
+  
+  .content .title {
+    font-size: 1.2em;
+    margin-top: 12px;
+    margin-bottom: 10px;
+    
+  }
+  
+  
+  
+  /* ----------------------------------------------------------------------------------------------------------------------------------------------- */
+  .key-area {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 0;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    align-items: flex-start; /* 确保子元素从顶部对齐 */
+    flex-wrap: nowrap; /* 防止换行 */
+  }
+  
+  .left-region {
+    flex: 1; /* 占据更多空间 */
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    height: calc(100vh - 80px);
+    margin-left: -2%;
+    min-width: 0;
+  }
+  
+  .image-container {
+    position: relative;
+    display: inline-block;
+    min-width: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: auto;
+    background: #f9f9f9;
+    width: 50%;
+  }
+  
+  #highlightImage {
+    max-width: none;  /* 移除最大宽度限制 */
+    width: auto;
+    height: auto;
+    transition: transform 0.3s ease;  /* 添加平滑过渡 */
+  }
+  
+  .text-area {
+    min-width: 0;
+    background: white;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    flex: 1;
+  }
+  
+  .textarea-container {
+    margin-bottom: 20px;
+  }
+  .textarea-container .textarea {
+    width: 100%;
+    height: 300px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: none;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-rect {
+    position: absolute;
+    border: 2px solid red;
+    display: none;
+    pointer-events: none;
+    z-index: 10;
+    transition: all 0.3s ease;  /* 添加矩形框的平滑过渡 */
+  }
+  
+  .column-rect {
+    position: absolute;
+    border: 2px solid green;
+    pointer-events: none; /* 防止影响点击事件 */
+    transition: all 0.3s ease;  /* 添加矩形框的平滑过渡 */
+  }
+  
+  .text-area {
+    display: block;
+    writing-mode: horizontal-tb;
+    line-height: 1.5;
+    white-space: normal;
+  }
+  
+  .text-line {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .text-item {
+    display: inline-block;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 3px;
+    transition: background-color 0.3s;
+    writing-mode: horizontal-tb;
+    font-size: 16px;
+  }
+  
+  .editable-text {
+    border: 2px dashed #b68856;
+    padding: 10px;
+    background-color: #f9f9f9;
+    cursor: text;
+  }
+  
+  .editable-text:focus {
+    outline: none;
+    border-color: #8a6d3b;
+    box-shadow: 0 0 5px rgba(182, 136, 86, 0.5);
+  }
+  
+  .right-region {
+    right: 0;
+    top: 80px; /* 根据导航栏高度调整 */
+    width: 25%;
+    height: calc(100vh - 80px); /* 让右侧区域高度占满剩余视口 */
+    background-color: #f5f5f5;
+    border-left: 1px solid #ddd;
+    display: flex; /* 添加 flexbox */
+    flex-direction: column; /* 子元素垂直排列 */
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto; /* 启用垂直滚动条 */
+    margin-right: -2%;
+  }
+  
+  .candidate-text-area {
+    flex: 1; /* 候选文字区域可扩展，占据多余空间 */
+    overflow-y: auto; /* 启用滚动 */
+    margin-bottom: 20px; /* 与表单分开 */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+    height: 60%;
+  }
+  #infoForm {
+    flex-shrink: 0; /* 表单区域保持固定高度 */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+    height: 55%;
+  }
+  
+  .candidate-button {
+    color: black;             /* 黑色文字 */
+    font-size: 24px;          /* 字号为 24px */
+    border: 1px solid black;  /* 细边框，黑色边框 */
+    background-color: transparent; /* 无填充色（透明背景） */
+    padding: 10px 20px;       /* 根据需要设置内边距 */
+    cursor: pointer;          /* 鼠标悬停时显示为可点击状态 */
+    transition: background-color 0.3s; /* 平滑的背景色变化 */
+    margin: 10px; 
+  }
+  
+  #submitInfoBtn {
+    background-color: #b9b9b9;     /* 背景色为灰色 */
+    color: white;               /* 文字颜色为白色 */
+    margin-right: 10px;         /* 按钮右侧间隙 */
+    border: none;               /* 去掉按钮的边框 */
+    font-size: 18px;            /* 设置字体大小为 18px，使文字更大 */
+    padding: 12px 30px;         /* 设置更大的内边距，增大按钮的大小 */
+    border-radius: 5px;         /* 可选：圆角按钮 */
+    cursor: pointer;           /* 鼠标悬停时显示为可点击状态 */
+    transition: background-color 0.3s;  /* 平滑的背景色过渡效果 */
+  }
+  /* ----------------------------------------------------------------------------------------------------------------------------------------------- */

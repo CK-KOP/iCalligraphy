@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>墨韵</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/img_evaluate_styles.css') }}"> <!-- 引用您的CSS文件 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.21.7/antd.min.css"> <!-- Ant Design 样式 -->
+    <style>
+        body {
+            background-image: url('{{ url_for("static", filename="images/backgrounds/white_paper.jpg") }}');
+        }
+    </style>
+</head>
+<body> 
+    
+    <div class="container">
+        <div class="step-container">
+            <!-- 第一步：上传文件 -->
+            <div class="step">
+                <h3>第一步：上传文件</h3>
+                <p>请选择单页图片，大小不超过2MB</p>
+                <p>单字像素在45px以上，支持jpg、</p>
+                <p>png、tiff、giff等格式，不支持黑底白字</p>
+                <div class="file-input">
+                    <label for="file-upload" id="file-upload-label">选择文件</label>
+                    <input type="file" id="file-upload" name="image" accept="image/*">
+                    <span id="file-name">未选择文件</span>
+                </div>
+            </div>
+
+            <!-- 第二步：进行字形评定 -->
+            <div class="step">
+                <h3>第二步：进行字形评定</h3>
+                <label><input type="radio" name="evaluation" value="default" checked> 默认评定</label>
+                <label><input type="radio" name="evaluation" value="custom"> 自选对比</label>
+                <div class="file-input" id="custom-compare-wrapper" style="display: none;">
+                    <button type="button" id="choose-from-library" style = "color: #ffffff">从字库选择文件</button>
+                    <span id="file-compare-name">未选择文件</span>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 操作和结果展示区域 -->
+        <div class="actions-results">
+            <!-- 开始评定按钮 -->
+            <div class="btn-align">
+                <button type="button" id="submit-btn" style = "color: #ffffff">开始评定</button>
+            </div>
+
+            <!-- 结果展示区域 -->
+            <div class="results-container">
+                <!-- 自选对比相似度 -->
+                <div class="similarity-result" id="similarity-result" style="display: none;">
+                    <div class="label-title">自选对比相似度：</div>
+                    <span id="custom-similarity"></span>%
+                </div>
+
+                <!-- 大模型字形评定建议 -->
+                <div class="model-suggestion">
+                    <div class="label-title">大模型字形评定建议</div>
+                    <div id="model-suggestion" class="suggestion-text"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: 字库选择 -->
+    <div id="library-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>选择字库文件</h3> 
+                <button type="button" class="close-button" id="close-modal-x">&times;</button>
+            </div> 
+    
+            <!-- 固定的选项框和搜索框部分 -->
+            <div class="modal-body-fixed">
+                <div class="setting-group">
+                    <div class="toggle-container">
+                        <label for="libraryToggle">选择字库：</label>
+                        <select id="libraryToggle">
+                            <option value="system">系统字库</option>
+                            <option value="personal">个人集字库</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="text" id="search-keyword" placeholder="请输入关键字筛选">
+            </div>
+    
+            <!-- 滚动的内容区域 -->
+            <div id="collectionGrid" class="collection-grid" style="overflow-y: auto; max-height: 400px;">
+                <!-- 矢量图和信息会动态插入到这里 -->
+            </div>
+    
+            <!-- 固定的按钮部分 -->
+            <div class="modal-footer" style="position: sticky; bottom: 0; background-color: #fff; padding: 10px; box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);">
+                <button type="button" id="confirm-selection" class="primary-button">确认选择</button>
+                <button type="button" id="cancel-selection" class="secondary-button">取消</button>
+            </div>
+        </div>
+    </div>
+    
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.getElementById('file-upload');
+            const fileNameDisplay = document.getElementById('file-name');
+            const customCompareWrapper = document.getElementById('custom-compare-wrapper');
+            const similarityResult = document.getElementById('similarity-result');
+            const chooseFromLibraryBtn = document.getElementById('choose-from-library');
+            const libraryModal = document.getElementById('library-modal');
+            const searchKeyword = document.getElementById('search-keyword');
+            const collectionGrid = document.getElementById('collectionGrid');
+
+            // 选择的字形判定方式
+            let selectedEvaluation = 'default';
+            // 已选择的对比文件
+            let selectedCompareFile = null;
+            
+            // 切换评定方式
+            document.querySelectorAll('input[name="evaluation"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    if (this.value === 'custom') {
+                        customCompareWrapper.style.display = 'block';
+                    } else {
+                        customCompareWrapper.style.display = 'none';
+                        // 重置选择
+                        selectedCompareFile = null;
+                        document.getElementById('file-compare-name').textContent = '未选择文件';
+                        document.getElementById('image-comparison').style.display = 'none';
+                    }
+                    selectedEvaluation = this.value;
+                });
+            });
+
+             // 打开字库选择模态框
+             chooseFromLibraryBtn.addEventListener('click', function () {
+                libraryModal.style.display = 'block';
+                resetCollection();
+                const library = document.getElementById('libraryToggle').value;
+                loadLibraryWithVectors(library);  // 默认加载系统字库
+                
+                // 关闭模态框
+                document.getElementById('close-modal-x').addEventListener('click', function () {
+                    libraryModal.style.display = 'none';
+                    selectedCompareFile = null
+                    // 更新字库选择按钮文本
+                    document.getElementById('file-compare-name').textContent = '';
+                });
+
+                // 确认选择并关闭模态框
+                document.getElementById('confirm-selection').addEventListener('click', function () {    
+                    libraryModal.style.display = 'none';
+                    
+                    // 如果已选择图片，更新对比
+                    if (selectedCompareFile) {
+                        updateImageComparison();
+                    }
+                });
+
+                // 取消选择但不关闭模态框
+                document.getElementById('cancel-selection').addEventListener('click', function () {
+                    // 移除所有卡片的选中状态
+                    document.querySelectorAll('.collection-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    selectedCompareFile = null
+                    // 更新字库选择按钮文本
+                    document.getElementById('file-compare-name').textContent = '';
+                    
+                });
+                
+            });
+
+            // 切换字库类型
+            document.getElementById('libraryToggle').addEventListener('change', function () {
+                resetCollection();  // 重置当前展示
+                loadLibraryWithVectors(this.value);  // 根据选择加载不同字库
+            });
+
+            // 重置集字展示
+            function resetCollection() {
+                collectionGrid.innerHTML = '';
+                currentPage = 1;
+                isLastPage = false;
+            }
+
+            // 搜索过滤功能
+            searchKeyword.addEventListener('input', function () {
+                filterCollection();
+            });
+
+            // 搜索字库并过滤
+            function filterCollection() {
+                const filter = searchKeyword.value.toUpperCase();
+                // 清空现有的卡片显示
+                collectionGrid.innerHTML = '';
+                // 重置分页
+                currentPage = 1;
+                isLastPage = false;
+
+                // 重新加载字库数据，并按搜索条件过滤
+                const library = document.getElementById('libraryToggle').value;
+                loadLibraryWithVectors(library);  // 根据字库类型加载数据
+            }
+
+            let currentPage = 1;
+            let isLoading = false;
+            let isLastPage = false;
+
+            // 监听模态框的滚动事件
+            collectionGrid.addEventListener('scroll', function () {
+                const nearBottom = collectionGrid.scrollHeight - collectionGrid.scrollTop - collectionGrid.clientHeight < 200;
+                if (nearBottom && !isLoading && !isLastPage) {
+                    isLoading = true;
+                    const library = document.getElementById('libraryToggle').value;
+                    loadLibraryWithVectors(library);  // 加载数据，或者选择个人字库
+                }
+            });
+
+            // 修改后的 loadLibraryWithVectors 支持分页，SVG和图片格式
+            function loadLibraryWithVectors(library) {
+                const searchKeyword = document.getElementById('search-keyword');
+
+                fetch(`/get_collection_images?library=${library}&search=${encodeURIComponent(searchKeyword.value)}&page=${currentPage}&per_page=50`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('字库加载失败');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // 根据返回的数据动态生成卡片
+                        data.images.forEach(function (image) {
+                            const cardHTML = createCollectionCard(image);
+                            collectionGrid.innerHTML += cardHTML; // 插入到滚动区域
+                        });
+
+                        // 更新当前页数
+                        currentPage = data.current_page;
+
+                        // 如果是最后一页，设置标志
+                        if (currentPage >= data.total_pages) {
+                            isLastPage = true;
+                        }
+
+                        // 重置加载状态
+                        isLoading = false;
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert("加载字库失败，请重试");
+                        isLoading = false;
+                    });
+            }
+
+            // 修改创建字库卡片的函数
+            function createCollectionCard(image) {
+                const card = document.createElement('div');
+                card.className = 'collection-card';
+                card.dataset.id = image.id;
+                card.dataset.is_svg = image.is_svg;
+
+                let imageContent;
+                if (image.is_svg) {
+                    imageContent = `
+                        <div class="svg-container">
+                            ${image.svg}
+                        </div>`;
+                } else {
+                    imageContent = `
+                        <div class="img-container">
+                            <img src="${image.image_url}" alt="${image.description}" />
+                        </div>`;
+                }
+
+                card.innerHTML = `
+                    ${imageContent}
+                    <div class="collection-card-details">
+                        <p>${image.description || ''}</p>
+                    </div>
+                `;
+
+                return card.outerHTML;
+            }
+
+            // 修改卡片点击事件处理
+            collectionGrid.addEventListener('click', function(event) {
+                const card = event.target.closest('.collection-card');
+                if (card) {
+                    // 移除所有卡片的选中状态
+                    document.querySelectorAll('.collection-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // 添加当前卡片的选中状态
+                    card.classList.add('selected');
+
+                    // 获取是否为SVG
+                    const isSvg = card.dataset.is_svg === 'true';
+                    
+                    if (isSvg) {
+                        // 获取SVG内容
+                        const svgContainer = card.querySelector('.svg-container');
+                        const svgContent = svgContainer ? svgContainer.innerHTML : '';
+                        selectedCompareFile = {
+                            id: card.dataset.id,
+                            svg: svgContent,
+                            is_svg: true,
+                            description: card.querySelector('.collection-card-details p').textContent
+                        };
+                    } else {
+                        // 获取图片URL
+                        const imgElement = card.querySelector('.img-container img');
+                        selectedCompareFile = {
+                            id: card.dataset.id,
+                            image_url: imgElement.src,
+                            is_svg: false,
+                            description: card.querySelector('.collection-card-details p').textContent
+                        };
+                    }
+
+                    // 更新字库选择按钮文本
+                    document.getElementById('file-compare-name').textContent = selectedCompareFile.description;
+                }
+            });
+
+
+            // 上传图片变量
+            let uploadedImageSrc = null;
+
+            // 修改文件上传事件处理
+            fileInput.addEventListener('change', function () {  
+                const file = this.files[0];
+                if (file) {
+                    fileNameDisplay.textContent = file.name;
+                    
+                    // 创建文件读取器来预览上传的图片
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImageSrc = e.target.result;
+                        updateImageComparison();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+
+            // 创建图片对比容器
+            const imageComparisonContainer = document.createElement('div');
+            imageComparisonContainer.id = 'image-comparison';
+            imageComparisonContainer.className = 'image-comparison';
+            imageComparisonContainer.style.display = 'none';
+            imageComparisonContainer.innerHTML = `
+                <div class="comparison-wrapper">
+                    <div class="uploaded-image-container">
+                        <div class="image-label">上传图片</div>
+                        <img id="uploaded-image" src="" alt="上传图片" style="width: 500px; height: auto;">
+                    </div>
+                    <div class="library-image-container">
+                        <div class="image-label">字库图片</div>
+                        <img id="library-image" src="" alt="字库图片" style="width: 500px; height: auto;">
+                    </div>
+                </div>
+            `;
+
+            // 获取目标元素
+            const resultsContainer = document.querySelector('.results-container');
+
+            // 在目标元素后面插入 imageComparisonContainer
+            resultsContainer.parentNode.insertBefore(imageComparisonContainer, resultsContainer.nextSibling);
+
+            // 更新图片对比容器的函数
+            function updateImageComparison() {
+                const uploadedImageEl = document.getElementById('uploaded-image');
+                const libraryImageContainer = document.querySelector('.library-image-container');
+                const comparisonContainer = document.getElementById('image-comparison');
+
+                // 处理上传的图片
+                if (uploadedImageSrc) {
+                    uploadedImageEl.src = uploadedImageSrc;
+                }
+
+                // 处理字库图片
+                if (selectedCompareFile) {
+                    // 清空原有内容
+                    libraryImageContainer.innerHTML = `
+                        <div class="image-label">字库图片</div>
+                    `;
+
+                    // 创建新的图片元素
+                    const libraryImage = document.createElement('img');
+                    libraryImage.alt = '字库图片';
+                    libraryImage.style.maxWidth = '400px';
+                    libraryImage.style.maxHeight = '400px';
+
+                    if (selectedCompareFile.is_svg && selectedCompareFile.svg) {
+                        // 处理 SVG 格式
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const img = new Image();
+
+                        img.onload = () => {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            const pngUrl = canvas.toDataURL('image/png');
+                            libraryImage.src = pngUrl;
+                            uploadPngToServer(pngUrl);
+                        };
+
+                        const svgBlob = new Blob([selectedCompareFile.svg], { type: 'image/svg+xml' });
+                        const svgUrl = URL.createObjectURL(svgBlob);
+                        img.src = svgUrl;
+                    } else if (selectedCompareFile.image_url) {
+                        // 处理普通图片格式
+                        libraryImage.src = selectedCompareFile.image_url;
+                        
+                        // 图片加载完成后上传到服务器
+                        libraryImage.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = libraryImage.naturalWidth;
+                            canvas.height = libraryImage.naturalHeight;
+                            ctx.drawImage(libraryImage, 0, 0);
+                            const pngUrl = canvas.toDataURL('image/png');
+                            uploadPngToServer(pngUrl);
+                        };
+                    }
+
+                    // 将图片添加到容器中
+                    libraryImageContainer.appendChild(libraryImage);
+                    comparisonContainer.style.display = 'block';
+                } else {
+                    comparisonContainer.style.display = 'none';
+                }
+            }
+
+            // 上传PNG文件到后端
+            function uploadPngToServer(pngDataUrl) {
+                // 将PNG Data URL转为Blob
+                const byteString = atob(pngDataUrl.split(',')[1]);
+                const arrayBuffer = new ArrayBuffer(byteString.length);
+                const uint8Array = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < byteString.length; i++) {
+                    uint8Array[i] = byteString.charCodeAt(i);
+                }
+
+                // 创建Blob
+                const blob = new Blob([uint8Array], { type: 'image/png' });
+
+                // 创建FormData并将文件附加到其中
+                const formData = new FormData();
+                formData.append("compare-file", blob, 'compare-image.png');
+
+                // 发送到后端保存
+                fetch('/save_comparison_image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('对比图片已保存到服务器');
+                    } else {
+                        console.log('保存图片失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('请求失败', error);
+                });
+            }
+
+
+            
+            // 开始评定按钮逻辑（保持不变
+            document.getElementById('submit-btn').addEventListener('click', function () {
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert("请上传文件！");
+                    return;
+                }
+
+                // 创建 FormData 对象
+                const formData = new FormData();
+                formData.append("image", file);
+
+                let url = '/img_evaluate';
+
+                // 如果选择了自定义评定，后端会使用已下载的对比文件
+                if (selectedEvaluation === 'custom') {
+                    if (!selectedCompareFile) {
+                        alert("请从字库选择对比文件！");
+                        return;
+                    }
+                    // 在这里，你不需要传递 compare-file 到后端了
+                    // 只需要后端使用已经存储的对比文件
+                    url = '/evaluate_and_compare';
+                }
+
+                document.getElementById('model-suggestion').textContent = '评定中，请稍候...';
+                document.getElementById('custom-similarity').textContent = '';
+                similarityResult.style.display = 'none';
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        document.getElementById('model-suggestion').textContent = data.result;
+                        if (data.customSimilarity) {
+                            document.getElementById('custom-similarity').textContent = data.customSimilarity;
+                            similarityResult.style.display = 'flex';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('请求失败，请重试。');
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

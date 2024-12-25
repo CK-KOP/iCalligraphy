@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCalligraphy Forum</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 基础样式 */
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #f5f6f7;
+    --accent-color: #ff6b6b;
+    --text-color: #333;
+    --border-color: #e1e4e8;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+    background-size: cover;   /* 背景图填充整个页面 */
+    background-position: center; /* 背景图居中 */
+    background-repeat: no-repeat; /* 避免背景重复 */
+    background-attachment: fixed; /* 背景固定，滚动时不动 */
+    color: #333;
+    background-image: url('{{ url_for("static", filename="images/backgrounds/background.jpeg") }}');
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 250px 1fr 300px;
+    gap: 20px;
+}
+
+/* 侧边栏基础样式 */
+.sidebar {
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 40px); /* 设置最大高度为视窗高度减去上下边距 */
+    overflow-y: auto; /* 添加垂直滚动条 */
+    scrollbar-width: thin; /* Firefox 滚动条样式 */
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Firefox 滚动条颜色 */
+}
+
+/* 自定义滚动条样式（WebKit浏览器） */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+/* 签到卡片 */
+.checkin-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.checkin-stats {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.streak-count {
+    font-size: 1.2em;
+    color: var(--accent-color);
+}
+
+.days-count {
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.checkin-button {
+    display: block;
+    background: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.checkin-button:hover {
+    background: #357abd;
+}
+
+/* 主要内容区域 */
+.main-content {
+    background: transparent;
+}
+
+/* 发帖编辑器 */
+.post-editor {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+textarea {
+    width: 95%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    resize: vertical;
+    font-size: 1em;
+}
+
+.image-upload-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.preview-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    position: relative;
+}
+
+.upload-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--secondary-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.upload-button:hover {
+    background: #e8e9ea;
+}
+
+.submit-post {
+    align-self: flex-end;
+    padding: 12px 24px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-post:hover {
+    background: #357abd;
+}
+
+/* 帖子列表 */
+.post {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.post-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-username {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.post-time {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.post-content {
+    margin-bottom: 15px;
+}
+
+.post-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.post-images img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.post-actions {
+    display: flex;
+    gap: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: #666;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    background: var(--secondary-color);
+}
+
+.like-post-btn.liked {
+    color: var(--accent-color);
+}
+
+.load-more-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--secondary-color);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.load-more-btn:hover {
+    background: #e8e9ea;
+}
+
+/* 卡片容器样式优化 */
+.trending-card,
+.active-users-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    max-height: calc(50vh - 40px); /* 限制每个卡片的最大高度 */
+    overflow-y: auto; /* 内容过多时显示滚动条 */
+}
+
+/* 列表内容显示优化 */
+.trending-list,
+.active-users-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+
+.trending-list li,
+.active-users-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.trending-list li:last-child,
+.active-users-list li:last-child {
+    border-bottom: none;
+}
+
+.trending-list a {
+    text-decoration: none;
+    color: var(--text-color);
+    display: block;
+}
+
+/* 确保内容不会溢出 */
+.trending-content {
+    word-break: break-word; /* 长文本自动换行 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* 限制显示行数 */
+    -webkit-box-orient: vertical;
+}
+
+.trending-stats {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.active-users-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.active-users-list img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: 500;
+}
+
+.user-likes {
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 200px 1fr 250px;
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        grid-template-columns: 1fr 300px;
+    }
+    .left-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .right-sidebar {
+        display: none;
+    }
+}
+    </style>
+</head>
+<body>
+    <main>
+        <div class="container">
+            <aside class="sidebar left-sidebar">
+                <div class="checkin-card">
+                    <h2><i class="fas fa-calendar-check"></i> 每日一字签到</h2>
+                    <div class="checkin-stats">
+                        <div class="streak-count">
+                            <i class="fas fa-fire"></i>
+                            <span>连续签到</span>
+                            <div class="days-count">{{ checkin_days }} 天</div>
+                        </div>
+                    </div>
+                    <a href="/checkin" class="checkin-button">
+                        <i class="fas fa-pen-fancy"></i> 立即签到
+                    </a>
+                </div>
+            </aside>
+
+            <section class="main-content">
+                <div class="post-editor">
+                    <h2><i class="fas fa-edit"></i> 发布新帖子</h2>
+                    <div class="editor-container">
+                        <textarea id="postContent" placeholder="分享你的书法心得..."></textarea>
+                        <div class="image-upload-container">
+                            <div class="image-preview" id="imagePreview"></div>
+                            <label for="postImages" class="upload-button">
+                                <i class="fas fa-camera"></i> 添加图片
+                                <input type="file" id="postImages" accept="image/*" multiple hidden>
+                            </label>
+                        </div>
+                        <button class="submit-post" onclick="postThread()">
+                            <i class="fas fa-paper-plane"></i> 发布
+                        </button>
+                    </div>
+                </div>
+
+                <div class="posts-section">
+                    <h2><i class="fas fa-scroll"></i> 最新帖子</h2>
+                    <div id="postList">
+                        {% for post in posts %}
+                        <article class="post" id="post_{{ post.post_id }}">
+                            <div class="post-header">
+                                <img src="/avatars/{{ post.username }}" alt="头像" class="post-avatar">
+                                <div class="post-info">
+                                    <h3 class="post-username">{{ post.username }}</h3>
+                                    <time class="post-time">{{ post.creation_date.strftime('%Y-%m-%d %H:%M') }}</time>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <p>{{ post.content }}</p>
+                                {% if post.image_paths %}
+                                <div class="post-images">
+                                    {% for path in post.image_paths %}
+                                    <img src="{{ path }}" alt="帖子图片" loading="lazy">
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="post-actions">
+                                <button class="action-btn like-post-btn {% if post.is_liked %}liked{% endif %}" 
+                                        data-post-id="{{ post.post_id }}">
+                                    <i class="fas fa-heart"></i>
+                                    <span class="like-count">{{ post.post_likes }}</span>
+                                </button>
+                                <a href="/post_detail/{{ post.post_id }}" class="action-btn comment-btn">
+                                    <i class="fas fa-comment"></i>
+                                    <span>{{ post.post_comments }}</span>
+                                </a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    <button id="loadMore" class="load-more-btn">
+                        <i class="fas fa-spinner"></i> 加载更多
+                    </button>
+                </div>
+            </section>
+
+            <aside class="sidebar right-sidebar">
+                <div class="trending-card">
+                    <h2><i class="fas fa-fire"></i> 热门帖子</h2>
+                    <ul class="trending-list">
+                        {% for post in hot_posts %}
+                        <li>
+                            <a href="/post_detail/{{ post.post_id }}">
+                                <div class="trending-content">{{ post.content[:50] }}...</div>
+                                <div class="trending-stats">
+                                    <i class="fas fa-heart"></i> {{ post.post_likes }}
+                                </div>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="active-users-card">
+                    <h2><i class="fas fa-users"></i> 活跃用户</h2>
+                    <ul class="active-users-list">
+                        {% for user in active_users %}
+                        <li id="user_{{ user.username }}">
+                            <img src="/avatars/{{ user.username }}" alt="头像">
+                            <div class="user-info">
+                                <span class="username">{{ user.username }}</span>
+                                <span class="user-likes">
+                                    <i class="fas fa-heart"></i> {{ user.user_likes }}
+                                </span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </main>
+    <script>
+        // 存储所有已选择的文件
+let selectedFiles = [];
+
+const imageInput = document.getElementById('postImages');
+const imagePreview = document.getElementById('imagePreview');
+let currentPage = 1;
+const pageSize = 10;
+
+// 图片预览处理
+imageInput.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    const existingImages = selectedFiles.length;
+    
+    // 将新文件添加到已选择文件数组
+    files.forEach((file, index) => {
+        if (file.type.startsWith('image/')) {
+            selectedFiles.push(file);
+            const reader = new FileReader();
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'preview-container';
+            previewContainer.dataset.fileIndex = existingImages + index;
+            
+            reader.onload = function(e) {
+                previewContainer.innerHTML = `
+                    <img src="${e.target.result}" class="preview-image">
+                    <button class="remove-image" onclick="removeImage(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            };
+            reader.readAsDataURL(file);
+            imagePreview.appendChild(previewContainer);
+        }
+    });
+    
+    // 清空 input 以便下次选择
+    imageInput.value = '';
+});
+
+// 移除图片
+function removeImage(container) {
+    const fileIndex = parseInt(container.dataset.fileIndex);
+    selectedFiles.splice(fileIndex, 1);
+    container.remove();
+    
+    // 更新剩余预览图片的索引
+    const previews = imagePreview.querySelectorAll('.preview-container');
+    previews.forEach((preview, index) => {
+        preview.dataset.fileIndex = index;
+    });
+}
+
+// 发布帖子时的图片处理
+async function postThread() {
+    const content = document.getElementById('postContent').value;
+    if (!content.trim()) {
+        showToast('请输入帖子内容');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('content', content);
+    
+    // 添加所有已选择的文件
+    selectedFiles.forEach(file => {
+        formData.append('images', file);
+    });
+    
+    try {
+        const response = await fetch('/post/create', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('发布成功');
+            resetEditor();
+            await loadLatestPosts();
+        } else {
+            showToast(data.message || '发布失败');
+        }
+    } catch (error) {
+        showToast('发布失败，请稍后重试');
+        console.error('Error:', error);
+    }
+}
+
+// 重置编辑器
+function resetEditor() {
+    document.getElementById('postContent').value = '';
+    imagePreview.innerHTML = '';
+    imageInput.value = '';
+    selectedFiles = []; // 清空已选择的文件数组
+}
+
+// 点赞功能
+async function toggleLike(postId, button) {
+    try {
+        const response = await fetch(`/post/like/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ post_id: parseInt(postId, 10) })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            // 更新点赞数显示
+            const likeCount = button.querySelector('.like-count');
+            likeCount.textContent = data.likes;
+            
+            // 更新按钮状态
+            button.classList.toggle('liked', data.is_liked);
+            
+            // 更新活跃用户点赞数
+            if (data.user_likes !== undefined) {
+                const userLikes = document.querySelector(`#user_${data.username} .user-likes`);
+                if (userLikes) {
+                    userLikes.innerHTML = `<i class="fas fa-heart"></i> ${data.user_likes}`;
+                }
+            }
+        } else {
+            showToast(data.message);
+        }
+    } catch (error) {
+        showToast('操作失败，请稍后重试');
+        console.error('Error:', error);
+    }
+}
+
+// 加载更多帖子
+async function loadMorePosts() {
+    const loadMoreBtn = document.getElementById('loadMore');
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
+    
+    try {
+        const response = await fetch(`/posts?page=${currentPage + 1}&size=${pageSize}`);
+        const data = await response.json();
+        
+        if (data.posts && data.posts.length > 0) {
+            currentPage++;
+            appendPosts(data.posts);
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
+    } catch (error) {
+        showToast('加载失败，请稍后重试');
+        console.error('Error:', error);
+    } finally {
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.innerHTML = '<i class="fas fa-spinner"></i> 加载更多';
+    }
+}
+
+// 加载最新帖子
+async function loadLatestPosts() {
+    try {
+        const response = await fetch(`/posts?page=1&size=${pageSize}`);
+        const data = await response.json();
+        
+        if (data.posts && data.posts.length > 0) {
+            const postList = document.getElementById('postList');
+            postList.innerHTML = '';
+            appendPosts(data.posts);
+        }
+    } catch (error) {
+        showToast('刷新失败，请稍后重试');
+        console.error('Error:', error);
+    }
+}
+
+// 添加帖子到列表
+function appendPosts(posts) {
+    const postList = document.getElementById('postList');
+    
+    posts.forEach(post => {
+        const postElement = createPostElement(post);
+        postList.insertAdjacentHTML('beforeend', postElement);
+    });
+    
+    // 为新添加的点赞按钮绑定事件
+    const newLikeButtons = postList.querySelectorAll('.like-post-btn:not([data-initialized])');
+    newLikeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const postId = button.getAttribute('data-post-id');
+            toggleLike(postId, button);
+        });
+        button.setAttribute('data-initialized', 'true');
+    });
+}
+
+// 创建帖子元素
+function createPostElement(post) {
+    const imageHtml = post.image_paths ? post.image_paths.map(path => 
+        `<img src="${path}" alt="帖子图片" loading="lazy">`
+    ).join('') : '';
+    
+    return `
+        <article class="post" id="post_${post.post_id}">
+            <div class="post-header">
+                <img src="/avatars/${post.username}" alt="头像" class="post-avatar">
+                <div class="post-info">
+                    <h3 class="post-username">${post.username}</h3>
+                    <time class="post-time">${formatDate(new Date(post.creation_date))}</time>
+                </div>
+            </div>
+            <div class="post-content">
+                <p>${post.content}</p>
+                ${imageHtml ? `<div class="post-images">${imageHtml}</div>` : ''}
+            </div>
+            <div class="post-actions">
+                <button class="action-btn like-post-btn" data-post-id="${post.post_id}">
+                    <i class="fas fa-heart"></i>
+                    <span class="like-count">${post.post_likes}</span>
+                </button>
+                <a href="/post_detail/${post.post_id}" class="action-btn comment-btn">
+                    <i class="fas fa-comment"></i>
+                    <span>${post.post_comments}</span>
+                </a>
+            </div>
+        </article>
+    `;
+}
+
+// 格式化日期
+function formatDate(date) {
+    return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// 显示提示消息
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }, 100);
+}
+
+// 初始化事件监听
+document.addEventListener('DOMContentLoaded', function() {
+    // 加载更多按钮点击事件
+    const loadMoreBtn = document.getElementById('loadMore');
+    loadMoreBtn.addEventListener('click', loadMorePosts);
+    
+    // 初始化已有的点赞按钮
+    document.querySelectorAll('.like-post-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const postId = button.getAttribute('data-post-id');
+            toggleLike(postId, button);
+        });
+    });
+    
+    // 添加无限滚动
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            loadMorePosts();
+        }
+    }, { threshold: 0.5 });
+    
+    observer.observe(loadMoreBtn);
+});
+    </script>
+</body>
+</html>

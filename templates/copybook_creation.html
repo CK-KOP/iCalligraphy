@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>书法字帖创建</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/copybook_creation_styles.css') }}">
+    <style>
+        body {
+            background-image: url('{{ url_for("static", filename="images/backgrounds/background.jpeg") }}');
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="main-container">
+        <!-- 左侧区域：字库展示 -->
+        <div class="collection-area">
+            <h2>字库展示</h2>
+            <div class="setting-group">
+                <!-- 字库选择 -->
+                <div class="toggle-container">
+                    <label for="libraryToggle">选择字库：</label>
+                    <select id="libraryToggle">
+                        <option value="system">系统字库</option>
+                        <option value="personal">个人字库</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                
+                <!-- 字体风格筛选 -->
+                <div class="toggle-container">
+                    <label for="fontTypeToggle">选择字体风格：</label>
+                    <select id="fontTypeToggle">
+                        <option value="all">全部</option>
+                        <option value="kaishu">楷书</option>
+                        <option value="xingshu">行书</option>
+                        <option value="caoshu">草书</option>
+                        <option value="lishu">隶书</option>
+                    </select>
+                </div>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="搜索字库...">
+            </div>
+            
+            <!-- 集字卡片展示 -->
+            <div class="collection-grid" id="collectionGrid"></div>
+        </div>
+
+        <div id="loading" style="display: none;">加载中...</div>        
+
+        <!-- 右侧区域：字帖创建 -->
+        <div class="creation-area">
+            <div id="previewContainer" class="preview-container"></div>
+
+            <div class="settings-container">
+                <div class="setting-group">
+                    <label for="backgroundSelect">背景类型:</label>
+                    <select id="backgroundSelect">
+                        <option value="white">白纸</option>
+                        <option value="xuan">宣纸</option>
+                        <option value="custom">自定义颜色</option>
+                    </select>
+                    <input id="colorPicker" type="color" value="#ffffff" style="display: none;">
+                    <div class="spacer"></div>
+
+                    <label for="rowsInput">行数:</label>
+                    <input id="rowsInput" type="number" min="1" value="3" style="width: 80px;">
+                </div>
+                <div class="setting-group">
+                    <label for="orderSelect">书写顺序:</label>
+                    <select id="orderSelect">
+                        <option value="ltr">从左到右</option>
+                        <option value="rtl">从右到左</option>
+                    </select>
+                    <div class="spacer"></div>
+                
+                    <label for="spacingRange">字间距</label>
+                    <input id="spacingRange" type="range" min="5" max="50" value="10">
+                    <div class="spacer"></div>
+                    
+                    <label for="titleInput">字帖标题</label>
+                    <input id="titleInput" type="text" placeholder="请输入字帖标题" maxlength="50">
+                </div>                
+
+                <div class="setting-group">
+                    <button id="zoomOut" style="width: 50px;">-</button>
+                    <span id="zoomValue">100%</span>
+                    <button id="zoomIn" style="width: 50px;">+</button>
+                    <button id="resetZoom" style="width: 70px;">重置</button>
+                    <div class="spacer"></div>
+
+                    <button id="clearButton" style="width: 100px;">清空</button>
+                    <button id="saveButton">保存并导出字帖</button>
+                    <div id="downloadLink"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='js/copybook_creation_script.js') }}"></script>
+</body>
+</html>

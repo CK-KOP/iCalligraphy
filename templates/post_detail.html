@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>帖子详情</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --text-color: #2c3e50;
+            --border-color: #eaeaea;
+            --background-color: #f8f9fa;
+        }
+
+        body {
+            font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            background-size: cover;   /* 背景图填充整个页面 */
+            background-position: center; /* 背景图居中 */
+            background-repeat: no-repeat; /* 避免背景重复 */
+            background-attachment: fixed; /* 背景固定，滚动时不动 */
+            color: #333;
+            background-image: url('{{ url_for("static", filename="images/backgrounds/white_paper.jpg") }}');
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .post-user {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .post-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+
+        .post-content {
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .post-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .post-images img {
+            width: 100%;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .post-stats {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            color: #666;
+        }
+
+        .like-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .like-btn i {
+            font-size: 1.5rem;
+            color: #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .like-btn.active i {
+            color: #ff4757;
+            animation: heart-burst 0.8s;
+        }
+
+        @keyframes heart-burst {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .comments-section {
+            margin-top: 2rem;
+        }
+
+        .comment {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-form {
+            margin-top: 2rem;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #357abd;
+        }
+
+        /* Image viewer styles */
+        .image-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .image-viewer img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
+
+        .close-viewer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .post-images img {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .post-images img:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="post-card">
+            <div class="post-header">
+                <img src="/avatars/{{ post_user.username }}" alt="用户头像" class="user-avatar">
+                <div>
+                    <div class="post-user">{{ post_user.username }}</div>
+                    <div class="post-date">{{ post.creation_date }}</div>
+                </div>
+            </div>
+
+            <div class="post-content">{{ post.content }}</div>
+
+            {% if post.image_paths %}
+            <div class="post-images">
+                {% for path in post.image_paths %}
+                <img src="{{ path }}" alt="帖子图片">
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="post-stats">
+                <span id="like-count">{{ post.post_likes }}人点赞</span>
+                <span>{{ post.post_comments }}条评论</span>
+            </div>
+
+            <button id="like-btn" class="like-btn{% if current_user in post.liked_users %} active{% endif %}" data-post-id="{{ post.post_id }}">
+                <i class="fas fa-heart"></i>
+                <span id="like-count">{{ post.post_likes }}</span>
+            </button>
+        </div>
+
+        <div class="comments-section">
+            <h3>评论 ({{ comments|length }})</h3>
+            <div id="comments-list">
+                {% for comment in comments %}
+                <div class="comment">
+                    <img src="/avatars/{{ comment.username }}" alt="评论头像" class="user-avatar">
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="post-user">{{ comment.username }}</span>
+                            <span class="post-date">{{ comment.creation_date }}</span>
+                        </div>
+                        <p>{{ comment.content }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="comment-form">
+            <textarea id="comment-text" class="comment-textarea" placeholder="写下你的评论..."></textarea>
+            <button id="submit-comment" class="submit-btn">发表评论</button>
+        </div>
+
+        <div class="image-viewer" id="imageViewer">
+            <i class="fas fa-times close-viewer" id="closeViewer"></i>
+            <img src="" alt="大图预览" id="viewerImage">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const likeBtn = document.getElementById('like-btn');
+            const submitCommentBtn = document.getElementById('submit-comment');
+            const commentText = document.getElementById('comment-text');
+
+            if (likeBtn) {
+                likeBtn.addEventListener('click', function() {
+                    const postId = this.getAttribute('data-post-id');
+                    toggleLike(postId, this);
+                });
+            }
+
+            if (submitCommentBtn) {
+                submitCommentBtn.addEventListener('click', function() {
+                    const commentContent = commentText.value;
+                    if (commentContent.trim()) {
+                        postComment(commentContent);
+                    } else {
+                        alert('评论内容不能为空');
+                    }
+                });
+            }
+        });
+
+        function toggleLike(postId, button) {
+            fetch(`/post/like/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ post_id: parseInt(postId, 10) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const likeCount = document.getElementById('like-count');
+                    likeCount.textContent = `${data.likes}人点赞`;
+                    button.classList.toggle('active');
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        function postComment(commentContent) {
+            const postId = document.getElementById('like-btn').getAttribute('data-post-id');
+            
+            fetch(`/post/${postId}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ comment_text: commentContent })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('comment-text').value = '';
+                    
+                    const commentsList = document.getElementById('comments-list');
+                    commentsList.innerHTML = '';
+                    data.comments.forEach(comment => {
+                        const commentHtml = `
+                            <div class="comment">
+                                <img src="${comment.avatar_path || '/default-avatar.png'}" alt="评论头像" class="user-avatar">
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <span class="post-user">${comment.username}</span>
+                                        <span class="post-date">${comment.creation_date}</span>
+                                    </div>
+                                    <p>${comment.content}</p>
+                                </div>
+                            </div>
+                        `;
+                        commentsList.insertAdjacentHTML('beforeend', commentHtml);
+                    });
+                } else {
+                    alert('评论失败：' + data.message);
+                }
+            });
+        }
+        // Add image viewer functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageViewer = document.getElementById('imageViewer');
+            const viewerImage = document.getElementById('viewerImage');
+            const closeViewer = document.getElementById('closeViewer');
+            
+            // Add click handlers to all post images
+            document.querySelectorAll('.post-images img').forEach(img => {
+                img.addEventListener('click', function() {
+                    viewerImage.src = this.src;
+                    imageViewer.classList.add('active');
+                });
+            });
+
+            // Close viewer on click
+            closeViewer.addEventListener('click', () => {
+                imageViewer.classList.remove('active');
+            });
+
+            // Close viewer on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    imageViewer.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

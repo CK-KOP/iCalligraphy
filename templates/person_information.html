@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户信息页面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/person_information.css') }}">
+    <!-- 添加字体图标库 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('{{ url_for("static", filename="images/backgrounds/background.jpeg") }}');
+        }
+    </style>
+</head>
+<body>
+    <!-- 头像更新模态框 -->
+    <div id="avatar-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>更换头像</h2>
+            <input type="file" id="avatar-input" accept="image/png, image/jpeg, image/jpg, image/gif">
+            <div class="preview-container">
+                <img id="preview-image" src="" alt="预览图片">
+            </div>
+            <button id="confirm-avatar-btn">确定</button>
+        </div>
+    </div>
+
+    <!-- 简历修改模态框 -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>修改简历</h2>
+            <textarea id="profile-input" rows="5" placeholder="请输入新的简历内容"></textarea>
+            <button id="confirm-profile-btn">保存</button>
+        </div>
+    </div>
+    
+     <!-- 添加新集字模态框 -->
+     <div id="add-collection-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>添加新集字</h2>
+            <form id="add-collection-form">
+                <input type="file" id="collection-image" accept="image/*" required>
+                <input type="text" id="collection-character" placeholder="请输入汉字" required>
+                <div class="preview-container">
+                    <img id="collection-preview" src="" alt="预览图片">
+                </div>
+                <button type="submit" id="confirm-collection-btn">上传</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 字帖大图预览模态框 -->
+    <div id="image-preview-modal" class="modal">
+        <!-- 内容会通过JavaScript动态添加 -->
+    </div>
+    <main>
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="left-section">
+                    <div class="avatar-container">
+                        <img src="{{ url_for('get_avatar', username=session['user']['username']) if 'user' in session and session['user'].get('username') else url_for('static', filename='images/default-avatar.png') }}" 
+                             alt="头像" 
+                             id="avatar" 
+                             class="avatar">
+                    </div>
+                    <div class="user-info">
+                        <h2 class="username">{{ session['user']['username'] }}</h2>
+                        <div class="profile-section">
+                            <p id="profile-text">{{ session['user'].get('profile', '暂无简介') }}</p>
+                            <button id="edit-profile-btn">修改简历</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <div class="tabs">
+                    <input type="radio" id="tab1" name="tabs" checked>
+                    <label for="tab1">我的集字</label>
+                    
+                    <input type="radio" id="tab2" name="tabs">
+                    <label for="tab2">我的字帖</label>
+                    
+                    <input type="radio" id="tab3" name="tabs">
+                    <label for="tab3">识别记录</label>
+                    
+                    <input type="radio" id="tab4" name="tabs">
+                    <label for="tab4">评定记录</label>
+
+                    <!-- 我的集字内容 -->
+                    <div class="tab-content" id="content1" >
+                        <div class="collection-header">
+                            <div class="search-bar">
+                                <input type="text" id="searchInput" placeholder="搜索集字...">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                            <button id="add-collection-btn" class="add-btn">
+                                <i class="fas fa-plus"></i> 添加新集字
+                            </button>
+                        </div>
+                        <div class="collection-area">
+                            <div id="collectionGrid" class="collection-grid"></div>
+                            <div id="loading" class="loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 我的字帖内容 -->
+                    <div class="tab-content" id="content2" style="display: none;">
+                        <div class="copybook-header">
+                            <div class="search-bar">
+                                <input type="text" id="copybookSearchInput" placeholder="搜索字帖...">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                            <button id="add-copybook-btn" class="add-btn">
+                                <i class="fas fa-plus"></i> 创建新字帖
+                            </button>
+                        </div>
+                        <div class="copybook-area">
+                            <div id="copybookGrid" class="collection-grid"></div>
+                            <div id="copybook-loading" class="loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 识别记录内容 -->
+                    <div class="tab-content" id="content3" style="display: none;">
+                        <div class="recognition-area">
+                            <div class="recognition-table">
+                                <div class="table-header">
+                                    <div class="header-cell">识别编号</div>
+                                    <div class="header-cell">原文件名</div>
+                                    <div class="header-cell">排版风格</div>
+                                    <div class="header-cell">上传时间</div>
+                                    <div class="header-cell actions">操作</div>
+                                </div>
+                                <div id="recognitionList" class="table-body"></div>
+                            </div>
+                            <div id="recognition-loading" class="loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评定记录内容 -->
+                    <div class="tab-content" id="content4" style="display: none;">
+                        <div class="evaluation-area">
+                            <div id="evaluationList" class="evaluation-list"></div>
+                            <div id="evaluation-loading" class="loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 头像点击事件
+        document.getElementById('avatar').addEventListener('click', function() {
+            document.getElementById('avatar-modal').style.display = 'flex';
+        });
+
+        // 关闭模态框
+        document.querySelectorAll('.close').forEach(button => {
+            button.addEventListener('click', () => {
+                button.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // 头像预览和上传
+        const avatarInput = document.getElementById('avatar-input');
+        const previewImage = document.getElementById('preview-image');
+        const confirmAvatarBtn = document.getElementById('confirm-avatar-btn');
+        const currentAvatar = document.getElementById('avatar');
+
+        avatarInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImage.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 确认上传头像
+        confirmAvatarBtn.addEventListener('click', () => {
+            const file = avatarInput.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/upload_avatar', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const newAvatarPath = `{{ url_for('get_avatar', username=session['user']['username']) }}`;
+                        currentAvatar.src = newAvatarPath + '?t=' + new Date().getTime();
+                        document.getElementById('avatar-modal').style.display = 'none';
+                        
+                        // 显示成功提示
+                        showToast('头像更新成功');
+                    } else {
+                        showToast(data.message || '头像上传失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('头像上传错误:', error);
+                    showToast('头像上传出现错误', 'error');
+                });
+            }
+        });
+
+        // 简历编辑功能
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const profileInput = document.getElementById('profile-input');
+        const confirmProfileBtn = document.getElementById('confirm-profile-btn');
+        const profileText = document.getElementById('profile-text');
+
+        editProfileBtn.addEventListener('click', () => {
+            profileInput.value = profileText.textContent;
+            profileModal.style.display = 'flex';
+        });
+
+        confirmProfileBtn.addEventListener('click', () => {
+            const newProfile = profileInput.value.trim();
+            if (newProfile) {
+                fetch('/update_profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile: newProfile })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        profileText.textContent = newProfile;
+                        profileModal.style.display = 'none';
+                        showToast('简历更新成功');
+                    } else {
+                        showToast(data.message || '简历更新失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('更新简历失败:', error);
+                    showToast('简历更新出现错误', 'error');
+                });
+            } else {
+                showToast('简历内容不能为空', 'error');
+            }
+        });
+
+        // 提示框函数
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // 点击模态框外部关闭
+        window.addEventListener('click', (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+
+         // 获取所有的tab radio按钮
+        const tabInputs = document.querySelectorAll('.tabs input[type="radio"]');
+        
+        // 为每个tab添加切换事件
+        tabInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // 隐藏所有内容
+                const contents = document.querySelectorAll('.tab-content');
+                contents.forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // 显示选中的内容
+                const selectedContent = document.querySelector(`#content${this.id.slice(-1)}`);
+                if (selectedContent) {
+                    selectedContent.style.display = 'block';
+                }
+            });
+        });
+
+    </script>
+    <script src="{{ url_for('static', filename='js/collectionDisplay.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/copybookDisplay.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/evaluateDisplay.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/recognitionDisplay.js') }}"></script>
+</body>
+</html>

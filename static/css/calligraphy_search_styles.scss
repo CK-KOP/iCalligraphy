@@ -1,0 +1,373 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background-size: cover;   /* 背景图填充整个页面 */
+    background-position: center; /* 背景图居中 */
+    background-repeat: no-repeat; /* 避免背景重复 */
+    background-attachment: fixed; /* 背景固定，滚动时不动 */
+	margin: 0;
+	padding: 0;
+	color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.search-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+.search-type {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    min-width: 150px;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+#searchInput {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 300px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.result-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+}
+
+.svg-container, .result-card img {
+    width: 100%;
+    height: 200px;
+    border-radius: 4px;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.svg-container svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.result-info {
+    margin-top: 10px;
+}
+
+.result-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-svg-container, #modalImage {
+    max-width: 100%;
+    max-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.modal-svg-container svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.modal-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.modal-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.hidden {
+    display: none;
+}
+
+
+#loadingIndicator {
+    position: fixed; /* 对于全局加载，使用 fixed；局部加载时改为 absolute */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8); /* 半透明背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    font-size: 18px;
+    color: #555;
+}
+
+#loadingIndicator.loading-hidden {
+    display: none;
+}
+
+/* 控制整个容器的样式 */
+.toggle-container {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;  // 使用行方向布局
+    align-items: center;  // 垂直居中对齐
+
+    /* 隐藏容器的样式 */
+    &.hidden {
+        display: none;
+    }
+}
+
+/* 标签样式 */
+.toggle-label {
+    font-size: 16px;
+    color: #333;
+    margin-right: 10px;  // 给标签与下拉框之间增加间距
+    font-weight: bold;
+}
+
+/* 下拉框样式 */
+.toggle-dropdown {
+    display: inline-block;
+    width: 200px;  // 控制下拉框的宽度，防止过长
+    padding: 8px 12px;
+    margin-top: 0;  // 移除上边距
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: all 0.3s ease;
+
+    /* 鼠标悬停时的样式 */
+    &:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* 聚焦时的样式 */
+    &:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+}
+
+// Alert 变量定义
+$alert-success-bg: #4CAF50;
+$alert-error-bg: #f44336;
+$alert-info-bg: #2196F3;
+$alert-warning-bg: #ff9800;
+$alert-text-color: #ffffff;
+$alert-border-radius: 4px;
+$alert-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+$alert-z-index: 1000;
+
+// Alert 基础样式
+.alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 24px;
+  border-radius: $alert-border-radius;
+  color: $alert-text-color;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: $alert-shadow;
+  z-index: $alert-z-index;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: slideIn 0.3s ease forwards;
+  
+  // 关闭按钮
+  .close-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+  
+  // 不同类型的样式
+  &.alert-success {
+    background-color: $alert-success-bg;
+    
+    &::before {
+      content: '✓';
+      margin-right: 8px;
+    }
+  }
+  
+  &.alert-error {
+    background-color: $alert-error-bg;
+    
+    &::before {
+      content: '✕';
+      margin-right: 8px;
+    }
+  }
+  
+  &.alert-info {
+    background-color: $alert-info-bg;
+    
+    &::before {
+      content: 'ℹ';
+      margin-right: 8px;
+    }
+  }
+  
+  &.alert-warning {
+    background-color: $alert-warning-bg;
+    
+    &::before {
+      content: '!';
+      margin-right: 8px;
+    }
+  }
+  
+  // 淡出动画
+  &.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+  }
+}
+
+// Keyframes 动画
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+// 多个提示框堆叠时的间距
+.alert + .alert {
+  margin-top: 10px;
+}
+
+// 响应式调整
+@media screen and (max-width: 768px) {
+  .alert {
+    width: calc(100% - 40px);
+    right: 20px;
+    text-align: center;
+    
+    .close-btn {
+      right: 12px;
+    }
+  }
+}

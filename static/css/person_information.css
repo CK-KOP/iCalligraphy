@@ -1,0 +1,779 @@
+@charset "UTF-8";
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Arial", sans-serif;
+  background-size: cover; /* 背景图填充整个页面 */
+  background-position: center; /* 背景图居中 */
+  background-repeat: no-repeat; /* 避免背景重复 */
+  background-attachment: fixed; /* 背景固定，滚动时不动 */
+  color: #333333;
+  line-height: 1.6;
+}
+
+.profile-container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+  margin-bottom: 30px;
+}
+.profile-header .left-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.avatar-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+.avatar-container .avatar {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.avatar-container .avatar:hover {
+  opacity: 0.8;
+}
+
+.user-info {
+  flex: 1;
+}
+.user-info .username {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #3a3a3a;
+}
+.user-info .profile-section {
+  position: relative;
+}
+.user-info .profile-section p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+.user-info .profile-section #edit-profile-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background-color: transparent;
+  color: #f9a825;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+.user-info .profile-section #edit-profile-btn:hover {
+  text-decoration: underline;
+}
+
+.tabs {
+  margin-top: 20px;
+}
+.tabs input[type=radio] {
+  display: none;
+}
+.tabs input[type=radio]:checked + label {
+  background-color: #f9a825;
+  color: #ffffff;
+  border-bottom: 2px solid #e59006;
+}
+.tabs label {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border-radius: 5px 5px 0 0;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.tabs label:hover {
+  background-color: #d7d7d7;
+}
+.tabs .tab-content {
+  display: none;
+}
+.tabs #tab1:checked ~ #content1,
+.tabs #tab2:checked ~ #content2,
+.tabs #tab3:checked ~ #content3,
+.tabs #tab4:checked ~ #content4 {
+  display: block !important;
+}
+
+.tab-content {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #ffffff;
+}
+.tab-content .content-area {
+  min-height: 300px;
+}
+
+.collection-area,
+.copybook-area,
+.recognition-area,
+.evaluation-area {
+  width: 100%;
+  min-height: 300px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  text-align: center;
+}
+.modal-content h2 {
+  margin-bottom: 20px;
+  color: #3a3a3a;
+}
+.modal-content .close {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+.modal-content .close:hover {
+  color: #333;
+}
+.modal-content #avatar-input, .modal-content #profile-input {
+  margin: 15px 0;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+.modal-content #avatar-input:focus, .modal-content #profile-input:focus {
+  outline: none;
+  border-color: #f9a825;
+}
+.modal-content .preview-container {
+  margin: 15px auto;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 10px;
+}
+.modal-content .preview-container img {
+  max-width: 100%;
+  border-radius: 5px;
+}
+.modal-content #confirm-avatar-btn, .modal-content #confirm-profile-btn {
+  background-color: #f9a825;
+  color: #ffffff;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+.modal-content #confirm-avatar-btn:hover, .modal-content #confirm-profile-btn:hover {
+  background-color: #e59006;
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: #ffffff;
+  z-index: 1100;
+}
+.toast.success {
+  background-color: #4CAF50;
+}
+.toast.error {
+  background-color: #f44336;
+}
+
+.collection-header, .copybook-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+.collection-header .search-bar, .copybook-header .search-bar {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+  margin-right: 20px;
+}
+.collection-header .search-bar input, .copybook-header .search-bar input {
+  width: 100%;
+  padding: 10px 35px 10px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  font-size: 14px;
+}
+.collection-header .search-bar input:focus, .copybook-header .search-bar input:focus {
+  outline: none;
+  border-color: #f9a825;
+}
+.collection-header .search-bar .search-icon, .copybook-header .search-bar .search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+.collection-header .add-btn, .copybook-header .add-btn {
+  background-color: #f9a825;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background-color 0.3s;
+}
+.collection-header .add-btn:hover, .copybook-header .add-btn:hover {
+  background-color: #e59006;
+}
+.collection-header .add-btn i, .copybook-header .add-btn i {
+  font-size: 14px;
+}
+
+.collection-area, .copybook-area {
+  height: 600px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* 保证卡片宽度自适应 */
+  gap: 20px;
+  padding: 10px;
+  width: 100%;
+}
+
+.collection-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 保证图片和信息部分顶部对齐 */
+  transition: transform 0.3s, box-shadow 0.3s;
+  width: 100%; /* 卡片宽度占满父容器 */
+  height: 100%; /* 卡片高度占满父容器 */
+}
+.collection-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.collection-card .svg-container,
+.collection-card .img-container {
+  width: 100%;
+  height: 200px; /* 确定图片和SVG的显示高度 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f8f8;
+}
+.collection-card .svg-container svg,
+.collection-card .img-container svg {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain; /* 确保SVG尽量填满容器，但保持原始比例 */
+}
+.collection-card .svg-container img,
+.collection-card .img-container img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain; /* 确保图片尽量填满容器，但保持原始比例 */
+}
+.collection-card .collection-card-details {
+  padding: 10px;
+  text-align: center;
+  flex-grow: 1; /* 文字部分可以扩展，保证布局整齐 */
+}
+.collection-card .collection-card-details p {
+  margin: 0;
+  font-size: 14px;
+  color: #333333;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 20px;
+  color: #f9a825;
+  font-size: 24px;
+}
+
+#add-collection-modal .modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+#add-collection-modal .modal-content input[type=text] {
+  padding: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+#add-collection-modal .modal-content input[type=text]:focus {
+  outline: none;
+  border-color: #f9a825;
+}
+#add-collection-modal .modal-content .preview-container {
+  margin: 0 auto;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+#add-collection-modal .modal-content .preview-container img {
+  max-width: 100%;
+  display: none;
+}
+#add-collection-modal .modal-content .preview-container img[src] {
+  display: block;
+}
+
+.copybook-title {
+  font-weight: bold;
+  margin-bottom: 5px !important;
+}
+
+.copybook-date {
+  font-size: 12px;
+  color: #666;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.card-actions .delete-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.card-actions .delete-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+#image-preview-modal .modal-content {
+  max-width: 90%;
+  height: 70%;
+  max-height: 500vh;
+  overflow: auto;
+}
+#image-preview-modal .modal-content .preview-container {
+  text-align: center;
+  height: 90%;
+  width: 90%;
+  margin: 20px 0;
+}
+#image-preview-modal .modal-content .preview-container img {
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+.evaluation-area {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+}
+.evaluation-area .loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.evaluation-area .loading-spinner i {
+  font-size: 24px;
+  color: #666;
+}
+
+.evaluation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.evaluation-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  transition: all 0.3s ease;
+}
+.evaluation-card .evaluation-content {
+  display: flex;
+  gap: 20px;
+}
+.evaluation-card .evaluation-image {
+  width: 200px;
+  flex-shrink: 0;
+}
+.evaluation-card .evaluation-image img {
+  width: 100%;
+  height: 200px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.evaluation-card .evaluation-image img:hover {
+  transform: scale(1.02);
+}
+.evaluation-card .evaluation-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.evaluation-card .evaluation-date {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+.evaluation-card .evaluation-text {
+  position: relative;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+.evaluation-card .evaluation-text .evaluation-text-container {
+  max-height: 80px;
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.3s ease;
+}
+.evaluation-card .evaluation-text .evaluation-text-container.expanded {
+  max-height: none;
+}
+.evaluation-card .evaluation-text .evaluation-text-content {
+  line-height: 1.6;
+  color: #333;
+  white-space: pre-line;
+}
+.evaluation-card .evaluation-text .evaluation-text-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, white);
+  pointer-events: none;
+  display: none;
+}
+.evaluation-card .expand-btn {
+  display: none;
+  color: #007bff;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  margin-top: 8px;
+  font-size: 0.9em;
+}
+.evaluation-card .expand-btn:hover {
+  text-decoration: underline;
+}
+.evaluation-card .card-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+.evaluation-card .card-actions .delete-btn {
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background-color 0.2s ease;
+}
+.evaluation-card .card-actions .delete-btn i {
+  font-size: 0.9em;
+}
+.evaluation-card .card-actions .delete-btn:hover {
+  background-color: #c82333;
+}
+
+.image-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+.image-preview-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+.image-preview-modal .preview-image {
+  max-width: 90%;
+  max-height: 90vh;
+  -o-object-fit: contain;
+     object-fit: contain;
+  border-radius: 4px;
+}
+.image-preview-modal .close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  background: none;
+  border: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+.image-preview-modal .close-btn:hover {
+  opacity: 1;
+}
+
+/* 识别记录页面样式 */
+.recognition-area {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f5f5f5;
+  /* 定义滚动条样式 */
+  /* 表格容器 */
+  /* 加载动画 */
+}
+.recognition-area::-webkit-scrollbar {
+  width: 8px;
+}
+.recognition-area::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.recognition-area::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+.recognition-area::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+.recognition-area .recognition-table {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20px;
+  /* 表头样式 */
+  /* 表格主体 */
+}
+.recognition-area .recognition-table .table-header {
+  display: grid;
+  grid-template-columns: 100px 1fr 120px 180px 100px;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.recognition-area .recognition-table .table-header .header-cell {
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+.recognition-area .recognition-table .table-header .header-cell.actions {
+  justify-content: center;
+}
+.recognition-area .recognition-table .table-body .table-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 120px 180px 100px;
+  border-bottom: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+.recognition-area .recognition-table .table-body .table-row:last-child {
+  border-bottom: none;
+}
+.recognition-area .recognition-table .table-body .table-row:hover {
+  background-color: #f8f9fa;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #212529;
+  display: flex;
+  align-items: center;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.filename {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions button i {
+  font-size: 14px;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions .edit-btn {
+  color: #28a745;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions .edit-btn:hover {
+  background-color: #28a745;
+  color: white;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions .edit-btn:active {
+  background-color: #218838;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions .delete-btn {
+  color: #dc3545;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions .delete-btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+.recognition-area .recognition-table .table-body .table-row .table-cell.actions .delete-btn:active {
+  background-color: #c82333;
+}
+.recognition-area .recognition-table .table-body .table-row:nth-child(even) {
+  background-color: #f8f9fa;
+}
+.recognition-area .recognition-table .table-body .table-row:nth-child(even):hover {
+  background-color: #f1f3f5;
+}
+.recognition-area .loading-spinner {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+.recognition-area .loading-spinner i {
+  font-size: 24px;
+  animation: spin 1s infinite linear;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-header .left-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .user-info .username {
+    font-size: 28px;
+  }
+  .user-info .profile-section #edit-profile-btn {
+    position: static;
+    margin-top: 10px;
+  }
+  .tabs label {
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  .collection-header, .copybook-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .collection-header .search-bar, .copybook-header .search-bar {
+    max-width: 100%;
+    margin-right: 0;
+  }
+  .collection-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+  }
+  .collection-card .svg-container {
+    height: 150px;
+  }
+}/*# sourceMappingURL=person_information.css.map */

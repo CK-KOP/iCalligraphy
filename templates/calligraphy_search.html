@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书法搜索系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calligraphy_search_styles.css') }}"></link>
+    <style>
+        body {
+            background-image: url('{{ url_for("static", filename="images/backgrounds/white_paper.jpg") }}');
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>书法库</h1>
+
+        <div class="search-section">
+            <select id="searchType" class="search-type">
+                <option value="calligraphy">书法字库</option>
+                <option value="artwork">作品库</option>
+            </select>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="请输入搜索内容...">
+                <button id="searchButton">搜索</button>
+            </div>
+        </div>
+        <div class="toggle-container">
+            <label for="fontTypeToggle" class="toggle-label">选择字体风格：</label>
+            <select id="fontTypeToggle" class="toggle-dropdown">
+                <option value="all">全部</option>
+                <option value="kaishu">楷书</option>
+                <option value="xingshu">行书</option>
+                <option value="caoshu">草书</option>
+                <option value="lishu">隶书</option>
+            </select>
+        </div>
+        
+        <div id="resultsContainer" class="results-container">
+
+        </div>
+        <div id="loadingIndicator" class="loading-hidden">
+            <p>正在加载，请稍候...</p>
+        </div>
+        <div id="modalContainer" class="modal-container hidden">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <img id="modalImage" src="" alt="大图展示">
+                <div class="modal-actions">
+                    <button id="downloadButton">下载</button>
+                    <button id="favoriteButton" class="favorite-button">收藏</button>
+                </div>
+                <div id="modalInfo" class="modal-info"></div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/calligraphy_search_script.js') }}"></script>
+</body>
+</html>
