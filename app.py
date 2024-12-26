@@ -1,5 +1,5 @@
 from ocr import ocr_recognize, parse_ocr_result
-from flask import Flask, render_template, request, redirect, jsonify, send_from_directory, url_for, flash, abort, session, make_response
+from flask import Flask, render_template, request, redirect, jsonify, send_from_directory, url_for, flash, abort, session, make_response, send_file
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy import func
@@ -187,6 +187,7 @@ class UserCheckin(db.Model):
     __tablename__ = 'user_checkin'
     user_id = db.Column(db.Integer, primary_key=True)
     checkin_days = db.Column(db.Integer, default=0)
+    last_checkin_date = db.Column(db.DateTime, default=None)  # 新增字段
 
 class UserLikes(db.Model):
     __tablename__ = 'user_likes'
@@ -196,7 +197,6 @@ class UserLikes(db.Model):
     post_id = db.Column(db.Integer, nullable=False)
     like_time = db.Column(db.DateTime, default=datetime.utcnow)
     
-
 class PostComment(db.Model):
     comment_id = db.Column(db.Integer, primary_key=True)               # 评论ID
     post_id = db.Column(db.Integer, db.ForeignKey('post.post_id'), nullable=False)  # 关联的帖子ID
@@ -371,11 +371,6 @@ def add_collection():
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
 
-# 保存字帖地址
-COPYBOOK_UPLOAD_FOLDER = os.path.join(os.getcwd(), 'copybook_uploads')  # 修改为 copybook_uploads
-os.makedirs(COPYBOOK_UPLOAD_FOLDER, exist_ok=True)  # 确保文件夹存在
-app.config['COPYBOOK_UPLOAD_FOLDER'] = COPYBOOK_UPLOAD_FOLDER
-
 # 保存字帖
 @app.route("/api/save_copybook", methods=["POST"])
 def save_copybook():
@@ -388,33 +383,64 @@ def save_copybook():
         return jsonify({"message": "缺少必要参数"}), 400
 
     try:
-        # 使用字帖标题的前几字符来生成文件名
-        file_name_base = f"{title[:10]}_{user_id}_{int(datetime.now().timestamp())}"  # 取标题的前10个字符
-        file_name = f"{file_name_base}.png"
-        file_path = os.path.join(app.config['COPYBOOK_UPLOAD_FOLDER'], file_name)
+        # 设置文件保存路径
+        target_directory = "copybook_uploads/"
+        os.makedirs(target_directory, exist_ok=True)
 
+        # 构建文件名和路径
+        filename = f"{title[:10]}_{user_id}_{int(datetime.now().timestamp())}.png"
+        file_path = os.path.join(target_directory, filename)
+        
+        # 转换为正斜杠格式
+        file_path = file_path.replace('\\', '/')
+        
         # 保存图片
         image_data = image_data.replace('data:image/png;base64,', '')
         with open(file_path, 'wb') as file:
             file.write(base64.b64decode(image_data))
 
         # 保存到数据库
-        copybook = UserCopybook(user_id=user_id, title=title, img_filepath=file_path, creation_date=datetime.now())
+        copybook = UserCopybook(
+            user_id=user_id,
+            title=title,
+            img_filepath=file_path,  # 直接存储相对路径
+            creation_date=datetime.now()
+        )
         db.session.add(copybook)
         db.session.commit()
-
         # 返回下载链接
-        download_url = f"/uploads/{file_name}"
-        return jsonify({"message": "字帖保存成功", "downloadUrl": download_url}), 200
+        download_url = url_for('download_copybook', filename=filename)
+        print(f"Generated download URL: {download_url}")
+        return jsonify({
+            "message": "字帖保存成功",
+            "downloadUrl": download_url
+        }), 200
 
     except Exception as e:
         print(e)
         return jsonify({"message": "保存字帖失败"}), 500
 
 # 下载字帖
-@app.route('/uploads/<path:filename>', methods=['GET'])
-def download_file(filename):
-    return send_from_directory(app.config['COPYBOOK_UPLOAD_FOLDER'], filename)
+@app.route('/download_copybook/<string:filename>')
+def download_copybook(filename):
+    try:
+        # 统一使用正斜杠
+        full_path = os.path.join("copybook_uploads", filename).replace('\\', '/')
+        print(f"完整文件路径: {full_path}")
+        
+        if not os.path.exists(full_path):
+            print("文件不存在")
+            return jsonify({"message": "文件不存在"}), 404
+
+        return send_file(
+            full_path,
+            mimetype='image/png',
+            as_attachment=True,
+            download_name=filename  # 直接使用传入的文件名
+        )
+    except Exception as e:
+        print(f"下载失败: {e}")
+        return jsonify({"message": "下载失败"}), 500
 
 #------------------------------------------------------------------------------------
 # 书法搜索页面
@@ -607,7 +633,6 @@ def get_data():
             "dynasty": work.description
         } for work in db_results]
         return jsonify(results)
-
 
 # 将字库中的字加入为收藏
 @app.route('/add_favourite', methods=['POST'])
@@ -814,6 +839,10 @@ def update_profile():
     else:
         return jsonify({'success': False, 'message': '用户不存在'})
 
+@app.route('/copybook_uploads/<path:filename>')
+def serve_uploads(filename):
+    return send_from_directory('copybook_uploads', filename)
+
 # 获取用户字帖
 @app.route('/get_copybooks')
 def get_copybooks():
@@ -849,7 +878,7 @@ def get_copybooks():
             'copybook_id': copybook.copybook_id,
             'title': copybook.title,
             'creation_date': copybook.creation_date.isoformat(),
-            'img_filepath': f"/uploads/{filename}" 
+            'img_filepath': f"/copybook_uploads/{filename}" 
         }
         copybooks.append(copybook_data)
     
@@ -1129,7 +1158,7 @@ def img_evaluate():
         full_answer = ''.join(answer)
 
         # 保存文件信息到数据库
-        save_and_record_file(file_path, user_id=1, evaluation_text= full_answer)
+        save_and_record_file(file_path, user_id=session['user']['user_id'], evaluation_text= full_answer)
 
         # 返回评估结果和图片路径
         return jsonify({"result": full_answer, "img_filepath": file_path})
@@ -1142,23 +1171,35 @@ def img_evaluate():
 def evaluate_and_compare(): 
     try:
         uploaded_file = request.files.get("image")
-        compare_file_path = os.path.join("evaluate_compare_images", "compare_image.png")
-        print(uploaded_file)
-
         if not uploaded_file:
             return jsonify({"error": "请上传完整的两个文件！"}), 400
-        
-        uploaded_file_path = os.path.join("evaluate_compare_images", "uploaded_file.png")
-        uploaded_file.save(uploaded_file_path)
 
+        compare_file_path = os.path.join("evaluate_compare_images", "compare_image.png")
+
+        # 获取上传的文件扩展名
+        file_extension = os.path.splitext(uploaded_file.filename)[1]
+
+        # 使用时间戳生成文件名
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{timestamp}{file_extension}"
+
+        # 设置文件保存路径
+        target_directory = "evaluate_compare_images/uploads/"
+        os.makedirs(target_directory, exist_ok=True)
+
+        # 构建完整文件路径
+        file_path = os.path.join(target_directory, filename)
+
+        # 保存文件到指定路径
+        uploaded_file.save(file_path)
 
         # 获取字体相似度
-        sift_score, template_score, ssim_score, combined_score = combined_similarity(uploaded_file_path, compare_file_path)
+        sift_score, template_score, ssim_score, combined_score = combined_similarity(file_path, compare_file_path)
         custom_similarity = f"{combined_score:.2f}"
 
-        uploaded_file.seek(0)
-        image_data = uploaded_file.read()
-        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        # 读取文件并转为 Base64
+        with open(file_path, "rb") as img_file:
+            image_base64 = base64.b64encode(img_file.read()).decode('utf-8')
 
         prompt = (
             "请假设你是一位书法大师，不用表明自己身份，你拥有深厚的书法造诣。请对这张书法作品进行详细评定，"
@@ -1185,15 +1226,8 @@ def evaluate_and_compare():
 
         full_answer = ''.join(answer)
 
-        # 生成以时间戳命名的文件名
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        uploaded_file_name = f"{timestamp}.png"
-        uploaded_file_path = os.path.join("evaluate_compare_images", "uploads", uploaded_file_name)
-
-        # 保存文件
-        uploaded_file.save(uploaded_file_path)
         # 保存文件信息到数据库
-        save_and_record_file(uploaded_file_path, user_id=1, evaluation_text= full_answer)
+        save_and_record_file(file_path, user_id=session['user']['user_id'], evaluation_text=full_answer)
 
         return jsonify({
             "result": full_answer,
@@ -1467,6 +1501,7 @@ def forum():
     # 获取用户签到天数
     checkin_days = 0
     if 'user' in session:
+        reset_checkin_streak(session['user']['user_id'])
         checkin = UserCheckin.query.get(session['user']['user_id'])
         if checkin:
             checkin_days = checkin.checkin_days
@@ -1483,14 +1518,41 @@ def forum():
     # 为每条帖子添加对应的用户名
     for post in posts:
         user = User.query.get(post.user_id)  # 根据 user_id 获取 User
+        like_record = UserLikes.query.filter_by(user_id=session['user']['user_id'], post_id= post.post_id).first()
         post.username = user.username   # 添加用户名属性
-
+        post.is_liked = like_record is not None
+    
     return render_template('forum.html',
         checkin_days=checkin_days,
         posts=posts,
         hot_posts=hot_posts,
         active_users=active_users
     )
+
+# 重置用户的签到天数
+def reset_checkin_streak(user_id):
+    # 获取今天和昨天的日期
+    today = datetime.utcnow().date()
+    yesterday = today - timedelta(days=1)
+
+    # 查询用户最近的打卡记录，按照日期降序排序
+    recent_checkins = UserClock.query.filter_by(user_id=user_id).filter(
+        UserClock.creation_date >= yesterday
+    ).order_by(UserClock.creation_date.desc()).all()
+
+    # 获取用户的打卡信息
+    user_checkin = UserCheckin.query.get(user_id)
+
+    if len(recent_checkins) == 0:  # 如果昨天和今天都没有打卡
+        if user_checkin:
+            user_checkin.checkin_days = 0
+
+    # 提交数据库更改
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"更新连续打卡天数失败: {e}")
 
 # 加载更多帖子
 @app.route('/posts')
@@ -1515,14 +1577,17 @@ def get_posts():
 # 帖子详情页面
 @app.route('/post_detail/<post_id>')
 def post_detail(post_id):
-    print(f"访问帖子ID：{post_id}")  # 确认是否正确触发路由
+    print(f"访问帖子ID: {post_id}")  # 确认是否正确触发路由
     # 查询帖子详情
     post = Post.query.get(post_id)
+    print("点赞数：", post.post_likes)
     print(f"帖子图片路径：{post.image_paths}")
     if not post:
         print("帖子未找到")  # 调试信息，确认是否能找到对应的帖子
         return redirect(url_for('index'))  # 如果帖子不存在，重定向到首页
-
+    like_record = UserLikes.query.filter_by(user_id=session['user']['user_id'], post_id= post_id).first()
+    post.is_liked = like_record is not None
+    print(like_record, post.is_liked)
     # 获取帖主信息
     post_user = User.query.get(post.user_id) if post else None
 
@@ -1535,28 +1600,7 @@ def post_detail(post_id):
         comment.username = user.username   # 添加用户名属性
 
     print(f"查询到的评论：{comments}")
-
     print(f"评论数：{len(comments)}")  # 打印评论数量，确认是否有评论
-    # 处理评论提交
-    if request.method == 'POST':
-        if 'like_button' in request.form:  # 点赞按钮被点击
-            post.post_likes += 1
-            db.session.commit()
-            return redirect(url_for('post_detail', post_id=post_id))
-
-        comment_text = request.form.get('comment_text', '').strip()
-        # 输出评论内容，确认是否传递正确
-        print(f"提交的评论内容: {comment_text}")
-
-        if comment_text:  # 如果评论内容不为空
-            user_id = session['user']['user_id'] 
-            image_path = ''
-            new_comment = PostComment(post_id=post_id, user_id=user_id, content=comment_text, image_path=image_path)
-            db.session.add(new_comment)
-            post.post_comments += 1
-            db.session.commit()
-            print(f"评论保存成功，ID为：{new_comment.comment_id}")
-            return redirect(url_for('post_detail', post_id=post_id))
 
     return render_template('post_detail.html', post=post, post_user=post_user, comments=comments)
 
@@ -1592,7 +1636,6 @@ def add_comment(post_id):
             'username': user.username if user else '未知用户',
             'content': comment.content,
             'creation_date': comment.creation_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'avatar_path': user.avatar_path if user and user.avatar_path else None
         })
 
     return jsonify({'success': True, 'comments': comment_list}), 201
@@ -1681,6 +1724,53 @@ def post_create():
 
     return jsonify({'success': True})
 
+# 删除帖子路由
+@app.route('/delete_post/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    if 'user' not in session or 'user_id' not in session['user']:
+        return jsonify({
+            'code': 401,
+            'message': '请先登录'
+        })
+    
+    try:
+        post = Post.query.get(post_id)
+        if not post:
+            return jsonify({
+                'code': 404,
+                'message': '帖子不存在'
+            })
+        
+        if post.user_id != session['user']['user_id']:
+            return jsonify({
+                'code': 403,
+                'message': '没有权限删除此帖子'
+            })
+            
+        # 处理多个图片路径的删除
+        if post.image_paths:  # 使用正确的字段名
+            for image_path in post.image_paths:  # 遍历图片路径列表
+                full_path = os.path.join('static', 'post_images', image_path)
+                if os.path.exists(full_path):
+                    os.remove(full_path)
+                    print(f"图片已删除: {full_path}")
+                
+        db.session.delete(post)
+        db.session.commit()
+        
+        return jsonify({
+            'code': 200,
+            'message': '帖子删除成功'
+        })
+        
+    except Exception as e:
+        print(f"删除过程中出错: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'code': 500,
+            'message': f'删除失败: {str(e)}'
+        })
+    
 # 打卡页面显示
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin():
@@ -1743,11 +1833,22 @@ def upload_checkin():
 
         # 更新用户签到天数
         user_checkin = UserCheckin.query.get(user_id)
+        current_date = datetime.utcnow().date()
+
         if user_checkin:
-            user_checkin.checkin_days += 1
+            last_checkin_date = user_checkin.last_checkin_date.date() if user_checkin.last_checkin_date else None
+
+            # 判断是否是连续打卡
+            if last_checkin_date == current_date - timedelta(days=1):
+                user_checkin.checkin_days += 1  # 连续打卡天数加1
+            else:
+                user_checkin.checkin_days = 1  # 重新开始计数
         else:
             user_checkin = UserCheckin(user_id=user_id, checkin_days=1)
             db.session.add(user_checkin)
+
+        # 更新最后一次打卡日期
+        user_checkin.last_checkin_date = datetime.utcnow()
 
         db.session.commit()
         return jsonify({'message': 'Upload successful', 'clock_id': new_record.clock_id, 'img_filepath': new_record.img_filepath})

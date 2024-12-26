@@ -322,7 +322,12 @@ function updatePreviewStyle() {
 
 // 处理保存
 function handleSave() {
-    const title = document.getElementById('titleInput').value;
+    const title = document.getElementById('titleInput').value.trim(); // 去除多余空格
+
+    if (!title) {
+        alert('字帖标题不能为空！');
+        return; // 阻止提交
+    }
     
     html2canvas(previewContainer, {
         scrollX: window.scrollX,
@@ -337,7 +342,6 @@ function handleSave() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                userId: 12345, // 应该从用户会话中获取
                 title: title,
                 image: imageData
             })
@@ -360,6 +364,7 @@ function handleSave() {
         });
     });
 }
+
 
 // 重置集字展示
 function resetCollection() {

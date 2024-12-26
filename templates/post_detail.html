@@ -240,10 +240,10 @@
                 <span>{{ post.post_comments }}条评论</span>
             </div>
 
-            <button id="like-btn" class="like-btn{% if current_user in post.liked_users %} active{% endif %}" data-post-id="{{ post.post_id }}">
+            <button id="like-btn" class="like-btn {% if post.is_liked %} active {% endif %}" data-post-id="{{ post.post_id }}">
                 <i class="fas fa-heart"></i>
-                <span id="like-count">{{ post.post_likes }}</span>
             </button>
+            
         </div>
 
         <div class="comments-section">
@@ -280,6 +280,8 @@
             const likeBtn = document.getElementById('like-btn');
             const submitCommentBtn = document.getElementById('submit-comment');
             const commentText = document.getElementById('comment-text');
+            console.log({{ post.post_likes }});
+            console.log({{ post.is_liked|tojson }});
 
             if (likeBtn) {
                 likeBtn.addEventListener('click', function() {
@@ -312,13 +314,16 @@
             .then(data => {
                 if (data.success) {
                     const likeCount = document.getElementById('like-count');
-                    likeCount.textContent = `${data.likes}人点赞`;
-                    button.classList.toggle('active');
+                    likeCount.textContent = `${data.likes}人点赞`;  // 更新点赞数
+
+                    // 切换按钮的 active 状态
+                    button.classList.toggle('active', data.is_liked);  // 根据服务器返回的 is_liked 决定按钮状态
                 } else {
                     alert(data.message);
                 }
             });
         }
+
 
         function postComment(commentContent) {
             const postId = document.getElementById('like-btn').getAttribute('data-post-id');
@@ -340,7 +345,7 @@
                     data.comments.forEach(comment => {
                         const commentHtml = `
                             <div class="comment">
-                                <img src="${comment.avatar_path || '/default-avatar.png'}" alt="评论头像" class="user-avatar">
+                                <img src="/avatars/${comment.username}" alt="评论头像" class="user-avatar">
                                 <div class="comment-content">
                                     <div class="comment-header">
                                         <span class="post-user">${comment.username}</span>

@@ -739,6 +739,160 @@ body {
   }
 }
 
+/* 更新卡片样式 */
+.post-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 用户名和时间样式 */
+.post-author-name {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.post-time {
+  font-size: 0.9em;
+  color: #95a5a6;
+}
+
+/* 文本内容样式 */
+.post-text-content {
+  font-size: 1em;
+  line-height: 1.6;
+  color: #34495e;
+  margin: 15px 0;
+}
+
+/* 展开按钮样式 */
+.expand-btn {
+  color: #3498db;
+  font-size: 0.9em;
+  cursor: pointer;
+  padding: 5px 0;
+  display: none;
+}
+
+.expand-btn:hover {
+  color: #2980b9;
+}
+
+/* 操作区域样式 */
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ecf0f1;
+}
+
+.action-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.action-stats span {
+  display: flex;
+  align-items: center;
+  color: #7f8c8d;
+  font-size: 0.9em;
+}
+
+.action-stats i {
+  margin-right: 5px;
+}
+
+.enter-post-btn {
+  color: #3498db;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #ecf0f1;
+  transition: all 0.2s ease;
+}
+
+.enter-post-btn:hover {
+  background: #3498db;
+  color: white;
+}
+
+/* 图片样式优化 */
+.post-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.post-image img {
+  width: 100%;
+  height: 150px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.post-image img:hover {
+  transform: scale(1.05);
+}
+
+/* 操作按钮容器 */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* 删除按钮样式 */
+.delete-btn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: #ff6b81;
+}
+
+.delete-btn i {
+  font-size: 0.9em;
+}
+
+/* 调整操作区域的布局 */
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ecf0f1;
+}
+
 @media (max-width: 768px) {
   .profile-header .left-section {
     flex-direction: column;

@@ -277,8 +277,10 @@ function setupModal() {
             const modalImg = document.getElementById('modalImage');
             const link = document.createElement('a');
             link.href = modalImg.src;
-            link.download = '艺术作品.png';
+            link.setAttribute('download', '书法作品.jpg'); // 设置下载的文件名
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
             
         }
     });

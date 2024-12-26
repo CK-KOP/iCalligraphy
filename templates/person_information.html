@@ -91,6 +91,9 @@
                     <input type="radio" id="tab4" name="tabs">
                     <label for="tab4">评定记录</label>
 
+                    <input type="radio" id="tab5" name="tabs">
+                    <label for="tab5">我的帖子</label>
+
                     <!-- 我的集字内容 -->
                     <div class="tab-content" id="content1" >
                         <div class="collection-header">
@@ -153,6 +156,16 @@
                         <div class="evaluation-area">
                             <div id="evaluationList" class="evaluation-list"></div>
                             <div id="evaluation-loading" class="loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 我的帖子内容 -->
+                    <div class="tab-content" id="content5" style="display: none;">
+                        <div class="posts-area">
+                            <div id="postsList" class="posts-list"></div>
+                            <div id="posts-loading" class="loading-spinner" style="display: none;">
                                 <i class="fas fa-spinner fa-spin"></i>
                             </div>
                         </div>
@@ -306,5 +319,6 @@
     <script src="{{ url_for('static', filename='js/copybookDisplay.js') }}"></script>
     <script src="{{ url_for('static', filename='js/evaluateDisplay.js') }}"></script>
     <script src="{{ url_for('static', filename='js/recognitionDisplay.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/postDisplay.js') }}"></script>
 </body>
 </html>

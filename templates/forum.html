@@ -359,6 +359,32 @@ textarea {
     font-size: 0.9em;
 }
 
+/* 确保按钮是放在右侧 */
+.enter-post-btn {
+    display: inline-flex;
+    align-items: center;
+    color: #fff; /* 白色文本 */
+    background-color: #007bff; /* 按钮背景色 */
+    padding: 8px 16px; /* 添加内边距 */
+    font-size: 14px;
+    border-radius: 4px; /* 圆角边框 */
+    text-decoration: none; /* 去掉链接下划线 */
+    margin-left: auto; /* 使按钮居右 */
+    justify-content: center;
+}
+
+/* 按钮内图标和文本之间添加间距 */
+.enter-post-btn i {
+    margin-right: 5px;
+}
+
+/* 如果需要悬停效果 */
+.enter-post-btn:hover {
+    background-color: #0056b3; /* 按钮悬停时背景色 */
+}
+
+
+
 /* 响应式设计 */
 @media (max-width: 1200px) {
     .container {
@@ -454,7 +480,13 @@ textarea {
                                     <i class="fas fa-comment"></i>
                                     <span>{{ post.post_comments }}</span>
                                 </a>
+                                <!-- 新增的进入帖子按钮 -->
+                                <a href="/post_detail/{{ post.post_id }}" class="action-btn enter-post-btn">
+                                    <i class="fas fa-arrow-right"></i>
+                                    进入帖子
+                                </a>
                             </div>
+                            
                         </article>
                         {% endfor %}
                     </div>
@@ -723,10 +755,15 @@ function createPostElement(post) {
                     <i class="fas fa-comment"></i>
                     <span>${post.post_comments}</span>
                 </a>
+                <a href="/post_detail/${post.post_id}" class="action-btn enter-post-btn">
+                    <i class="fas fa-arrow-right"></i>
+                    进入帖子
+                </a>
             </div>
         </article>
     `;
 }
+
 
 // 格式化日期
 function formatDate(date) {

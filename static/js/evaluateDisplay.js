@@ -26,6 +26,7 @@ function loadEvaluations() {
             data.evaluations.forEach(evaluation => {
                 const card = createEvaluationCard(evaluation);
                 document.getElementById('evaluationList').appendChild(card);
+
             });
 
             evaluationCurrentPage = data.current_page + 1;
@@ -39,6 +40,29 @@ function loadEvaluations() {
             document.getElementById('evaluation-loading').style.display = 'none';
         });
 }
+
+// 监听 tab 显示事件
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.target.style.display === 'block') {
+            const cards = document.querySelectorAll('.evaluation-card');
+            cards.forEach(card => {
+                const textContainer = card.querySelector('.evaluation-text-container');
+                const textContent = card.querySelector('.evaluation-text-content');
+                const expandBtn = card.querySelector('.expand-btn');
+                const textMask = card.querySelector('.evaluation-text-mask');
+                
+                const needsExpansion = textContent.scrollHeight > textContainer.clientHeight;
+                if (needsExpansion) {
+                    expandBtn.style.display = 'block';
+                    textMask.style.display = 'block';
+                }
+            });
+        }
+    });
+});
+
+observer.observe(document.getElementById('content4'), { attributes: true, attributeFilter: ['style'] });
 
 // 创建评定记录卡片
 function createEvaluationCard(evaluation) {
@@ -78,14 +102,6 @@ function createEvaluationCard(evaluation) {
     const expandBtn = card.querySelector('.expand-btn');
     const textMask = card.querySelector('.evaluation-text-mask');
     
-    // 检查文本是否需要展开按钮
-    setTimeout(() => {
-        const needsExpansion = textContent.scrollHeight > textContainer.clientHeight;
-        if (needsExpansion) {
-            expandBtn.style.display = 'block';
-            textMask.style.display = 'block';
-        }
-    }, 0);
     
     // 展开/收起文本的点击事件
     expandBtn.addEventListener('click', () => {
