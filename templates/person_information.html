@@ -93,6 +93,10 @@
 
                     <input type="radio" id="tab5" name="tabs">
                     <label for="tab5">我的帖子</label>
+                    
+                    <!-- 在原有的tabs部分添加管理员tab -->
+                    <input type="radio" id="tab6" name="tabs" class="admin-tab" style="display: none;">
+                    <label for="tab6" class="admin-tab" style="display: none;">审核上传字</label>
 
                     <!-- 我的集字内容 -->
                     <div class="tab-content" id="content1" >
@@ -170,6 +174,44 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 添加审核内容区域 -->
+                    <div class="tab-content" id="content6" style="display: none;">
+                        <div class="review-area">
+                            <h3>待审核列表</h3>
+                            <div class="review-header">
+                                <div class="search-bar">
+                                    <input type="text" id="reviewSearchInput" placeholder="搜索待审核的字...">
+                                    <i class="fas fa-search search-icon"></i>
+                                </div>
+                            </div>
+                            <div class="review-grid" id="reviewGrid"></div>
+                            <div id="review-loading" class="loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+
+                            <h3>审核历史</h3>
+                            <div class="history-filters">
+                                <!-- 状态筛选下拉框 -->
+                                <select id="statusFilter" onchange="updateHistoryFilters()">
+                                    <option value="">全部状态</option>
+                                    <option value="approved">已通过</option>
+                                    <option value="rejected">已拒绝</option>
+                                </select>
+
+                                <!-- 搜索框 -->
+                                <input type="text" id="historySearch" placeholder="搜索审核历史..." 
+                                    onkeyup="debounce(updateHistoryFilters, 500)()">
+                            </div>
+                            <!-- 审核历史内容 -->
+                            <div id="reviewHistory" class="review-history"></div>
+                            <div id="history-loading" class="loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </div>
@@ -320,5 +362,6 @@
     <script src="{{ url_for('static', filename='js/evaluateDisplay.js') }}"></script>
     <script src="{{ url_for('static', filename='js/recognitionDisplay.js') }}"></script>
     <script src="{{ url_for('static', filename='js/postDisplay.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/reviewDisplay.js') }}"></script>
 </body>
 </html>

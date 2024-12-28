@@ -37,6 +37,18 @@ app.config['SECRET_KEY'] = 'your-secret-key-here'
 db = SQLAlchemy(app)
 
 # 模型定义
+class Admin(db.Model):
+    __tablename__ = 'admins'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False, unique=True)  # 管理员用户名
+    admin_level = db.Column(db.Integer, default=1)  # 管理员级别，可以用于区分不同权限
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __init__(self, username, admin_level=1):
+        self.username = username
+        self.admin_level = admin_level
+
 class User(db.Model):
     __tablename__ = 'user'
     
@@ -208,6 +220,19 @@ class PostComment(db.Model):
     def __repr__(self):
         return f'<Comment {self.comment_id}>'
     
+class UploadedChar(db.Model):
+    __tablename__ = 'uploaded_chars'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    char = db.Column(db.String(1), nullable=False)  # 单个字符
+    char_author = db.Column(db.String(100), nullable=False)  # 作者
+    char_font = db.Column(db.String(50), nullable=False)  # 字体
+    char_source = db.Column(db.String(255), nullable=False)  # 来源
+    image_path = db.Column(db.String(255), nullable=False)  # 图片路径
+    uploader = db.Column(db.String(100), nullable=False)  # 上传人用户名
+    upload_time = db.Column(db.DateTime, default=datetime.utcnow)  # 上传时间
+    status = db.Column(db.Enum('pending', 'approved', 'rejected'), default='pending')  # 审核状态
+
 #------------------------------------------------------------------------------------
 # 创建字帖页面
 @app.route("/copybook_creation")
@@ -1070,9 +1095,182 @@ def ocr_edit(image_name):
     # 返回HTML文件
     return send_from_directory('static/ocr_pages', f'proof_page_{image_name}.html')
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+from flask import jsonify, session, request
+from datetime import datetime
+
+# 检查当前用户是否为管理员
+@app.route('/api/check_admin', methods=['GET'])
+def check_admin():
+    if 'user' not in session:
+        return jsonify({'is_admin': False})
+    
+    admin = Admin.query.filter_by(username=session['user']['username']).first()
+    return jsonify({'is_admin': admin is not None})
+
+# 获取待审核的字列表
+@app.route('/api/get_review_chars', methods=['GET'])
+def get_review_chars():
+    # 先验证是否登录且是管理员
+    if 'user' not in session:
+        return jsonify({'error': '请先登录'}), 401
+        
+    admin = Admin.query.filter_by(username=session['user']['username']).first()
+    if not admin:
+        return jsonify({'error': '需要管理员权限'}), 403
+    
+    # 获取查询参数
+    search_query = request.args.get('search', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # 构建查询
+    query = UploadedChar.query.filter_by(status='pending')
+    
+    # 如果有搜索关键词，添加搜索条件
+    if search_query:
+        query = query.filter(
+            db.or_(
+                UploadedChar.char.like(f'%{search_query}%'),
+                UploadedChar.char_author.like(f'%{search_query}%'),
+                UploadedChar.char_font.like(f'%{search_query}%')
+            )
+        )
+    
+    # 按上传时间倒序排序
+    query = query.order_by(UploadedChar.upload_time.desc())
+    
+    # 分页
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    chars = pagination.items
+    
+    # 构建响应数据
+    chars_data = [{
+        'id': char.id,
+        'char': char.char,
+        'char_author': char.char_author,
+        'char_font': char.char_font,
+        'char_source': char.char_source,
+        'image_path': char.image_path,
+        'uploader': char.uploader,
+        'upload_time': char.upload_time.isoformat()
+    } for char in chars]
+    
+    return jsonify({
+        'chars': chars_data,
+        'total': pagination.total,
+        'pages': pagination.pages,
+        'current_page': page
+    })
+
+# 处理审核决定
+@app.route('/api/review_char/<int:char_id>', methods=['POST'])
+def review_char(char_id):
+    # 验证用户是否登录且是管理员
+    if 'user' not in session:
+        return jsonify({'error': '请先登录'}), 401
+        
+    admin = Admin.query.filter_by(username=session['user']['username']).first()
+    if not admin:
+        return jsonify({'error': '需要管理员权限'}), 403
+    
+    data = request.get_json()
+    decision = data.get('decision')
+    print(decision)
+    if decision not in ['approve', 'reject']:
+        return jsonify({'error': '无效的决定'}), 400
+    
+    uploaded_char = UploadedChar.query.get_or_404(char_id)
+    
+    try:
+        if decision == 'approve':
+            # 读取图片文件
+            with open(uploaded_char.image_path, 'rb') as f:
+                image_data = f.read()
+            
+            # 创建新的Character记录
+            new_char = Character(
+                character=uploaded_char.char,
+                author_name=uploaded_char.char_author,
+                style=uploaded_char.char_font,
+                image_data=image_data,
+                image_type='image/png'  # 根据实际图片类型调整
+            )
+        
+            db.session.add(new_char)
+            uploaded_char.status = 'approved'
+            
+        else:
+            uploaded_char.status = 'rejected'
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': '审核处理成功'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'error': f'处理失败: {str(e)}'
+        }), 500
+
+# 获取审核历史记录
+@app.route('/api/review_history', methods=['GET'])
+def get_review_history():
+    # 验证用户是否登录且是管理员
+    if 'user' not in session:
+        return jsonify({'error': '请先登录'}), 401
+        
+    admin = Admin.query.filter_by(username=session['user']['username']).first()
+    if not admin:
+        return jsonify({'error': '需要管理员权限'}), 403
+    
+    search_query = request.args.get('search', '')
+    status = request.args.get('status', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    query = UploadedChar.query
+    
+    # 添加状态过滤
+    if status in ['approved', 'rejected']:
+        query = query.filter_by(status=status)
+    elif status == '':  # 如果未指定状态，默认只获取 'approved' 和 'rejected'
+        query = query.filter(UploadedChar.status.in_(['approved', 'rejected']))
+
+    # 添加搜索条件
+    if search_query:
+        query = query.filter(
+            db.or_(
+                UploadedChar.char.like(f'%{search_query}%'),
+                UploadedChar.char_author.like(f'%{search_query}%'),
+                UploadedChar.char_font.like(f'%{search_query}%'),
+                UploadedChar.uploader.like(f'%{search_query}%')
+            )
+        )
+    
+    query = query.order_by(UploadedChar.upload_time.desc())
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    chars = pagination.items
+    
+    chars_data = [{
+        'id': char.id,
+        'char': char.char,
+        'char_author': char.char_author,
+        'char_font': char.char_font,
+        'char_source': char.char_source,
+        'uploader': char.uploader,
+        'status': char.status,
+        'upload_time': char.upload_time.isoformat()
+    } for char in chars]
+    
+    return jsonify({
+        'history': chars_data,
+        'total': pagination.total,
+        'pages': pagination.pages,
+        'current_page': page
+    })
 
 #------------------------------------------------------------------------------------
 # 大模型字形评定页面
@@ -1412,6 +1610,7 @@ def upload_char_info():
     char = data.get("char")
     top = data.get("top")
     left = data.get("left")
+    timestamp = data.get("timestamp")
 
     # 获取字的详细信息
     char_content = data.get("char_content")
@@ -1420,24 +1619,45 @@ def upload_char_info():
     char_source = data.get("char_source")
 
     # 确保字符和位置信息存在
-    if not (char and top is not None and left is not None):
-        return jsonify({"status": "failure", "message": "字符或位置信息缺失"}), 400
+    if not (char and top is not None and left is not None and timestamp):
+        return jsonify({"status": "failure", "message": "字符、位置信息或时间戳缺失"}), 400
 
     # 确保字的信息完整
     if not all([char_content, char_author, char_font, char_source]):
         return jsonify({"status": "failure", "message": "缺少必要信息"}), 400
 
-    # 打印接收到的字的信息（用于调试）
-    print(f"Received character: {char}, top: {top}, left: {left}")
-    print(f"字的内容: {char_content}")
-    print(f"字的作者: {char_author}")
-    print(f"字的字体: {char_font}")
-    print(f"字的来源: {char_source}")
+    # 构建图片路径
+    char_unicode = hex(ord(char))[2:]  # 获取字符的Unicode编码的十六进制形式
+    image_path = f"static/cutted_single_char/{timestamp}/{char_unicode}_{top}_{left}.png"
 
-    # 这里可以加入保存到数据库或其他操作的逻辑
+    try:
+        # 创建新的上传记录
+        new_char = UploadedChar(
+            char=char_content,
+            char_author=char_author,
+            char_font=char_font,
+            char_source=char_source,
+            image_path=image_path,
+            uploader=session['user']['username']
+        )
+        
+        # 保存到数据库
+        db.session.add(new_char)
+        db.session.commit()
 
-    # 返回成功的响应
-    return jsonify({"status": "success", "message": "信息上传成功"})
+        return jsonify({
+            "status": "success", 
+            "message": "信息上传成功",
+            "upload_id": new_char.id
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error saving to database: {str(e)}")
+        return jsonify({
+            "status": "failure",
+            "message": "数据库保存失败"
+        }), 500
 
 """前端回传上传图片信息"""
 @app.route("/upload_work_info", methods=["POST"])
@@ -1746,21 +1966,38 @@ def delete_post(post_id):
                 'code': 403,
                 'message': '没有权限删除此帖子'
             })
+        
+        # 删除相关的点赞记录
+        UserLikes.query.filter_by(post_id=post_id).delete()
+        
+        # 删除相关的评论记录
+        comments = PostComment.query.filter_by(post_id=post_id).all()
+        for comment in comments:
+            # 如果评论有图片，删除评论图片文件
+            if comment.image_path:
+                comment_image_path = os.path.join('static', 'comment_images', comment.image_path)
+                if os.path.exists(comment_image_path):
+                    os.remove(comment_image_path)
+        # 删除所有相关评论记录
+        PostComment.query.filter_by(post_id=post_id).delete()
             
-        # 处理多个图片路径的删除
-        if post.image_paths:  # 使用正确的字段名
-            for image_path in post.image_paths:  # 遍历图片路径列表
+        # 处理帖子的图片删除
+        if post.image_paths:
+            for image_path in post.image_paths:
                 full_path = os.path.join('static', 'post_images', image_path)
                 if os.path.exists(full_path):
                     os.remove(full_path)
-                    print(f"图片已删除: {full_path}")
+                    print(f"帖子图片已删除: {full_path}")
                 
+        # 删除帖子本身
         db.session.delete(post)
+        
+        # 提交所有更改
         db.session.commit()
         
         return jsonify({
             'code': 200,
-            'message': '帖子删除成功'
+            'message': '帖子及相关数据删除成功'
         })
         
     except Exception as e:
@@ -1883,6 +2120,12 @@ def get_random_char():
                                          image_id=character.character_id)
 
     return jsonify({'image_data': image_data})
+
+#------------------------------------------------------------------------------------
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == "__main__":
     with app.app_context():

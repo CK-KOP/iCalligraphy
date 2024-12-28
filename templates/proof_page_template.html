@@ -316,6 +316,7 @@
                 fontSize *= 0.9; // 每次缩小字体10%
                 updateFontSize();
             });
+            
 
             function updateFontSize() {
                 const textItems = document.querySelectorAll(".text-item");
@@ -607,6 +608,13 @@
                         alert("请填写所有信息！");
                         return;
                     }
+                    
+                    // 获取当前HTML文件名
+                    const currentPath = window.location.pathname;
+                    const filename = currentPath.split('/').pop();  // 获取路径最后一部分
+                    // 使用正则表达式提取数字
+                    const timestamp = filename.match(/\d+/)[0];  // 提取连续数字
+                    console.log("timestamp:", timestamp);
 
                     // 发送所有数据到后端
                     fetch("/upload_char_info", {
@@ -622,6 +630,7 @@
                             char_author: charAuthor,
                             char_font: charFont,
                             char_source: charSource,
+                            timestamp: timestamp,  // 添加时间戳
                         }),
                     })
                         .then((response) => response.json())
@@ -687,6 +696,64 @@
                     candidateTextArea.appendChild(noCandidates);
                 }
             }
+
+
+            // 获取转发按钮
+            const shareButton = document.querySelector('button[value="转发页面"]');
+
+            // 定义发帖接口的URL
+            const POST_API_URL = '/post/create';  // 修改为正确的路由
+
+            shareButton.addEventListener('click', async function() {
+                try {
+                    // 获取当前iframe的URL
+                    const currentPageUrl = window.location.href;
+                    
+                    // 获取图片信息
+                    const image = document.getElementById('highlightImage');
+                    const imageUrl = image.src;
+                    const imageName = imageUrl.split('/').pop();
+                    
+                    // 获取文本内容
+                    const textArea = document.querySelector('.text-area');
+                    const textContent = (textArea && textArea.innerText) ? textArea.innerText.trim() : '分享一个识别结果';
+                    
+                    if (!textContent) {
+                        throw new Error('文本内容不能为空');
+                    }
+
+                    // 创建 FormData 对象
+                    const formData = new FormData();
+                    formData.append('content', `${textContent}\n\n查看原页面：${currentPageUrl}`);
+
+                    // 获取图片文件
+                    // 注意：这里需要先把图片URL转换为文件
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], imageName, { type: blob.type });
+                    formData.append('images', file);
+
+                    // 发送POST请求
+                    const postResponse = await fetch(POST_API_URL, {
+                        method: 'POST',
+                        body: formData  // 不需要设置 Content-Type，浏览器会自动设置
+                    });
+
+                    if (postResponse.ok) {
+                        const result = await postResponse.json();
+                        if (result.success) {
+                            window.location.href = '/forum';
+                        } else {
+                            throw new Error(result.message || '发帖失败');
+                        }
+                    } else {
+                        throw new Error('发帖失败');
+                    }
+                } catch (error) {
+                    console.error('转发失败:', error);
+                    alert(error.message || '转发失败，请稍后重试');
+                }
+            });
         </script>
 
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
