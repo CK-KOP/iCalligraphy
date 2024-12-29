@@ -8,7 +8,8 @@ from single_char import search_character
 from great_works import search_artworks
 from your_api_code import main
 from fonts_comparison import combined_similarity
-import asyncio, threading, shutil, hashlib, cv2, time
+from contour import extract_text_contours
+import asyncio, threading, shutil, hashlib, cv2, time, tempfile, glob, random
 from datetime import datetime  # 只导入 datetime 类
 from sqlalchemy import or_
 from werkzeug.utils import secure_filename
@@ -259,7 +260,10 @@ def get_collection_images():
     elif fontType == 'lishu':
         fontType = '隶书'
 
-
+    # 获取当前用户的 user_id
+    user_id = session.get('user', {}).get('user_id', None)
+    if user_id is None:
+        return jsonify({'error': '用户未登录'}), 401  # 如果用户没有登录，返回错误
 
     # 根据 library 参数从不同的表中获取数据
     if library == 'system':
@@ -274,7 +278,7 @@ def get_collection_images():
                 )
             )
         if fontType != 'all':
-                query = query.filter(Character.style.ilike(f'%{fontType}%'))
+            query = query.filter(Character.style.ilike(f'%{fontType}%'))
 
         paginated_characters = query.paginate(page=page, per_page=per_page)
 
@@ -303,15 +307,15 @@ def get_collection_images():
         })
 
     elif library == 'personal':
-        query = UserFavourite.query
+        query = UserFavourite.query.filter_by(user_id=user_id)  # 添加用户 ID 过滤条件
 
         if search_query:
             query = query.filter(
                 UserFavourite.character.ilike(f'%{search_query}%')
             )
-            
+        
         if fontType != 'all':
-                query = query.filter(UserFavourite.character.ilike(f'%{fontType}%'))
+            query = query.filter(UserFavourite.character.ilike(f'%{fontType}%'))
         
         paginated_favourites = query.paginate(page=page, per_page=per_page)
 
@@ -467,6 +471,56 @@ def download_copybook(filename):
         print(f"下载失败: {e}")
         return jsonify({"message": "下载失败"}), 500
 
+@app.route('/api/process_image', methods=['POST'])
+def process_image():
+    try:
+        data = request.json
+        character_id = data['character_id']
+        library_type = data['library_type']
+        
+        # 从数据库获取图片数据
+        if library_type == 'system':
+            character = Character.query.get(character_id)
+            image_data = character.image_data
+        else:
+            favorite = UserFavourite.query.get(character_id)
+            image_data = favorite.image_data
+            
+        if not image_data:
+            return jsonify({'error': 'Image not found'}), 404
+
+        # 创建临时文件来存储原始图片和处理后的图片
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as input_file, \
+             tempfile.NamedTemporaryFile(suffix='.png', delete=False) as output_file:
+            
+            # 保存原始图片到临时文件
+            input_file.write(image_data)
+            input_file.flush()
+            
+            try:
+                # 使用现有的extract_text_contours函数处理图片
+                extract_text_contours(input_file.name, output_file.name)
+                
+                # 读取处理后的图片数据
+                with open(output_file.name, 'rb') as f:
+                    processed_image_data = f.read()
+                
+                # 直接返回处理后的图片数据作为响应
+                response = make_response(processed_image_data)
+                response.headers.set('Content-Type', 'image/png')
+                return response
+                
+            finally:
+                # 清理临时文件
+                try:
+                    os.unlink(input_file.name)
+                    os.unlink(output_file.name)
+                except Exception as e:
+                    print(f"Error cleaning up temporary files: {e}")
+                    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 #------------------------------------------------------------------------------------
 # 书法搜索页面
 @app.route("/calligraphy_search")
@@ -482,7 +536,6 @@ def is_chinese_char(char):
 @app.route('/search', methods=['POST'])
 async def search():
     max_cnt = 50
-    # 接收前端传来的 JSON 数据
     data = request.get_json()
     search_type = data.get('type', '')
     query = data.get('query', '')
@@ -500,30 +553,38 @@ async def search():
     if not query:
         return jsonify({"error": "查询内容不能为空"}), 400
 
-    # 毛笔字搜索逻辑
     if search_type == "calligraphy":
-        # 检查输入是否包含中文字符
-        first_char = query.strip()[0]  # 截取第一个字符
+        first_char = query.strip()[0]
         if is_chinese_char(first_char):
-            
-            # 数据库查询
             query = db.session.query(Character).filter(Character.character == first_char)
             if fontType != 'all':
                 query = query.filter(Character.style.ilike(f'%{fontType}%'))
-            db_results = query.all()  # 获取查询结果
+            db_results = query.all()
+            
             if db_results:
-                    # 如果数据库中存在该字
-                results = [{
-                    "svgContent": result.svg,  # 数据库没有 SVG 内容
-                    "vectorId": str(result.character_id),
-                    "info": f"{result.author_name or '作者不详'} {result.style or '字体不详'} {result.character}"
-                } for result in db_results]
+                results = []
+                for result in db_results:
+                    char_data = {
+                        "vectorId": str(result.character_id),
+                        "info": f"{result.author_name or '作者不详'} {result.style or '字体不详'} {result.character}",
+                        "is_svg": result.is_svg
+                    }
+                    
+                    if result.is_svg:
+                        char_data["svgContent"] = result.svg
+                    else:
+                        # Convert binary image data to base64
+                        image_b64 = base64.b64encode(result.image_data).decode('utf-8')
+                        char_data["imageData"] = f"data:{result.image_type};base64,{image_b64}"
+                    
+                    results.append(char_data)
             else:
                 # 如果数据库中不存在，调用自定义函数
                 results = await search_character(first_char)
 
                 # 毛笔字搜索逻辑中的存储部分
                 insert_count = 0
+                answer = []
                 for result in results:
                     if insert_count >= max_cnt:  # 达到最大插入数，停止插入
                         break
@@ -549,14 +610,15 @@ async def search():
                         author_name=author_name,
                         style=style
                     )
+                    result['is_svg'] = True
+                    answer.append(result)
                     db.session.add(new_character)
-
                     insert_count += 1  # 更新插入计数
-                # 提交数据库事务
-                
+
+                    # 提交数据库事务
                     db.session.commit()
                     db.session.rollback()
-
+                results = answer
             return jsonify(results)
             
         else:
@@ -616,9 +678,8 @@ async def search():
 # 展示书法字库与作品库
 @app.route('/get_data', methods=['POST'])
 def get_data():
-    # 接收前端传来的 JSON 数据
     data = request.get_json()
-    type = data.get('type')  # 获取前端传来的类型
+    type = data.get('type')
     fontType = data.get('fontType')
     
     if fontType == 'kaishu':
@@ -631,21 +692,31 @@ def get_data():
         fontType = '隶书'
     
     if type == 'calligraphy':
-        # 查询书法字库的数据
         query = db.session.query(Character)
         
         if fontType != 'all':
             query = query.filter(Character.style.ilike(f'%{fontType}%'))
         
-        db_results = query.all()  # 获取查询结果
+        db_results = query.all()
         
-        results = [{
-            "svgContent": result.svg,  # 数据库没有 SVG 内容
-            "vectorId": str(result.character_id),
-            "info": f"{result.author_name or '作者不详'} {result.style or '字体不详'} {result.character}"
-        } for result in db_results]
+        results = []
+        for result in db_results:
+            char_data = {
+                "vectorId": str(result.character_id),
+                "info": f"{result.author_name or '作者不详'} {result.style or '字体不详'} {result.character}",
+                "is_svg": result.is_svg
+            }
+            
+            if result.is_svg:
+                char_data["svgContent"] = result.svg
+            else:
+                # Convert binary image data to base64
+                image_b64 = base64.b64encode(result.image_data).decode('utf-8')
+                char_data["imageData"] = f"data:{result.image_type};base64,{image_b64}"
+            
+            results.append(char_data)
+            
         return jsonify(results)
-    
     else:
         # 查询作品库的数据
         db_results = db.session.query(GreatWork).all()
@@ -667,15 +738,26 @@ async def add_favourite():
     
     user_id = session['user'].get('user_id')
     
-    # 获取字符和SVG内容
+    # 获取字符信息，SVG内容或图片数据
     character = data.get('info')
-    svg_content = data.get('svgContent')
+    content = data.get('content')  # 这个是SVG内容或图片数据
+    is_svg = data.get('is_svg', False)  # 是否是SVG格式
     
     # 参数验证
-    if not character or not svg_content:
-        return jsonify({"error": "字符和SVG内容不能为空"}), 400
+    if not character or content is None:
+        return jsonify({"error": "字符和内容不能为空"}), 400
     
     try:
+        if is_svg:
+            svg_content = content  # 直接使用SVG内容
+            image_data = None
+            image_type = None
+        else:
+            svg_content = None
+            # 如果是图片，将 Base64 编码解码为二进制数据
+            image_data = base64.b64decode(content.split(',')[1])  # 去掉 "data:image/png;base64,"
+            image_type = 'image/png'  # 假设图片是 PNG 格式，你可以根据需要修改
+        
         # 检查是否已经收藏过
         existing_favourite = UserFavourite.query.filter_by(
             user_id=user_id, 
@@ -686,11 +768,13 @@ async def add_favourite():
         if existing_favourite:
             return jsonify({"message": "该字已经收藏"}), 200
         
-        # 创建新的收藏记录，只处理SVG内容
+        # 创建新的收藏记录
         new_favourite = UserFavourite(
             user_id=user_id,
             character=character,
             svg=svg_content,
+            image_data=image_data,
+            image_type=image_type,
         )
         
         # 添加到数据库
@@ -792,8 +876,6 @@ def person_information():
     return render_template('person_information.html')
 
 AVATAR_UPLOAD_FOLDER = 'user_avatar_img'
-
-
 app.config['AVATAR_UPLOAD_FOLDER'] = AVATAR_UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -992,7 +1074,6 @@ def get_evaluations():
         'total_items': paginated_evaluations.total
     })
 
-
 # 新增：获取评定图片的接口
 app.config['EVALUATION_UPLOAD_FOLDER'] = 'evaluate_compare_images/uploads'
 @app.route('/evaluation_images/<path:filename>')
@@ -1094,9 +1175,6 @@ def ocr_edit(image_name):
     
     # 返回HTML文件
     return send_from_directory('static/ocr_pages', f'proof_page_{image_name}.html')
-
-from flask import jsonify, session, request
-from datetime import datetime
 
 # 检查当前用户是否为管理员
 @app.route('/api/check_admin', methods=['GET'])
@@ -1659,6 +1737,55 @@ def upload_char_info():
             "message": "数据库保存失败"
         }), 500
 
+@app.route('/add_to_favourite', methods=['POST'])
+def add_to_favourite():
+    if 'user' not in session:
+        return jsonify({'status': 'error', 'message': '请先登录'})
+    
+    try:
+        data = request.get_json()
+        user_id = session['user']['user_id']
+        character = data.get('character')
+        timestamp = data.get('timestamp')
+        top = data.get('top')
+        left = data.get('left')
+        
+        # 构建通配符路径模式
+        pattern = f"static/cutted_single_char/{timestamp}/*_{top}_{left}.png"
+        matching_files = glob.glob(pattern)
+        
+        if not matching_files:
+            return jsonify({'status': 'error', 'message': '找不到对应的图片文件'})
+        
+        # 使用找到的第一个匹配文件
+        image_path = matching_files[0]
+        
+        # 读取图片文件
+        try:
+            with open(image_path, 'rb') as f:
+                image_data = f.read()
+                image_type = 'png'
+        except FileNotFoundError:
+            return jsonify({'status': 'error', 'message': '找不到对应的图片文件'})
+        
+        # 创建新的收藏记录
+        new_favourite = UserFavourite(
+            user_id=user_id,
+            character=character,
+            image_data=image_data,
+            image_type=image_type
+        )
+        
+        db.session.add(new_favourite)
+        db.session.commit()
+        
+        return jsonify({'status': 'success', 'message': '添加成功'})
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding to favourites: {str(e)}")
+        return jsonify({'status': 'error', 'message': '服务器错误，请稍后重试'})
+    
 """前端回传上传图片信息"""
 @app.route("/upload_work_info", methods=["POST"])
 def upload_work_info():
@@ -2097,17 +2224,24 @@ def upload_checkin():
 # 从字库中随机选择字体传入
 @app.route('/get-random-char', methods=['GET'])
 def get_random_char():
-    # 获取随机字的逻辑
-    character = db.session.query(Character).filter(Character.character == '飞').first()
-    # 或者使用随机查询：
-    # character = db.session.query(Character).order_by(func.random()).first()
+ # 使用当前日期作为随机种子
+    today = datetime.now().strftime('%Y%m%d')
+    random.seed(today)
+    
+    # 获取总字符数并生成今天的随机索引
+    total_chars = db.session.query(Character).count()
+    if total_chars == 0:
+        return jsonify({'error': 'No characters in database'}), 404
+    
+    daily_index = random.randint(0, total_chars - 1)
+    character = db.session.query(Character).offset(daily_index).limit(1).first()
     
     if not character:
-        return jsonify({'error': 'No character found'}), 404
+        return jsonify({'error': 'Character not found'}), 404
         
     image_data = {
         'id': character.character_id,
-        'character': character.character,  # 添加字符本身
+        'character': character.character,
         'description': f'{character.author_name} {character.style} {character.character}',
         'is_svg': character.is_svg
     }

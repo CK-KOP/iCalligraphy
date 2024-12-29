@@ -330,6 +330,13 @@ $alert-z-index: 1000;
     animation: fadeOut 0.3s ease forwards;
   }
 }
+.result-card img {
+  max-width: 100%;
+  max-height: 100%; /* 限制图片的最大高度 */
+  object-fit: contain; /* 保持图片的纵横比 */
+  display: block; /* 移除默认的行内元素间隙 */
+}
+
 
 // Keyframes 动画
 @keyframes slideIn {

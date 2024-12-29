@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous" />
+        <link rel="stylesheet"  href="/static/css/ocr_styles.css" />
+        <title>墨韵</title>
+    </head>
+
+    <body>
+        <!-- 导航栏 -->
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                
+                <a class="navbar-brand">按页校对</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <button type="submit" name="action" value="字框" class="no-border-button" title="显示字框">
+                        <img src="/static/imgs/word_circle.png" alt="字框" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="列框" class="no-border-button" title="显示列框">
+                        <img src="/static/imgs/column_circle.png" alt="列框" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="图片显隐" class="no-border-button" title="图片显隐">
+                        <img src="/static/imgs/hide_pic.png" alt="图片显隐" width="40" height="40" />
+                    </button>
+                    <button type="button" id="zoomInBtn" class="no-border-button" title="放大图片">
+                        <img src="/static/imgs/pic_big.png" alt="放大" width="40" height="40" />
+                    </button>
+                    <button type="button" id="zoomOutBtn" class="no-border-button" title="缩小图片">
+                        <img src="/static/imgs/pic_small.png" alt="缩小" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="文本显隐" class="no-border-button" title="文本显隐">
+                        <img src="/static/imgs/hide_words.png" alt="文本显隐" width="40" height="40" />
+                    </button>
+                    <button type="submit" id="copyTextBtn" name="action" value="复制文本" class="no-border-button" title="复制文本">
+                        <img src="/static/imgs/copy_words.png" alt="复制文本" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="编辑文本" class="no-border-button" title="编辑文本">
+                        <img src="/static/imgs/edit_words.png" alt="编辑文本" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="保存" class="no-border-button-save" title="保存修改">
+                        <img src="/static/imgs/save_changes.png" alt="保存" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="字号增加" class="no-border-button" title="增加字号">
+                        <img src="/static/imgs/words_big.png" alt="字号增加" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="字号减小" class="no-border-button" title="减小字号">
+                        <img src="/static/imgs/words_small.png" alt="字号减小" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="转发页面" class="no-border-button" title="转发页面">
+                        <img src="/static/imgs/share_page.png" alt="转发页面" width="40" height="40" />
+                    </button>
+                    <button type="submit" name="action" value="添加到集字" class="no-border-button" title="添加到集字">
+                        <img src="/static/imgs/add_favourite.png" alt="添加到集字" width="40" height="40" />
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主体区域 -->
+        <div class="key-area">
+            <!-- 左侧区域 -->
+            <div class="left-region">
+                <div class="image-container">
+                    <img id="highlightImage" src="/static/upload_imgs/1735462832433.png" alt="识别图片" />
+                    <!-- 矩形框将动态插入这里 -->
+                </div>
+                <div class="text-area" id="textArea">
+                    <!-- 文字将动态插入这里 -->
+                </div>
+            </div>
+
+            <!-- 右侧区域 -->
+            <div class="right-region">
+                <h3>候选字</h3>
+                <div class="candidate-text-area" id="candidateTextArea">
+                    <!-- 候选文字将动态插入这里 -->
+                </div>
+                <div id="infoForm">
+                    <h3>上传至平台字库审核</h3>
+                    <form>
+                        <label for="charContent">内容：</label>
+                        <input type="text" id="charContent" name="charContent" required /><br /><br />
+                        <label for="charAuthor">作者：</label>
+                        <input type="text" id="charAuthor" name="charAuthor" required /><br /><br />
+                        <label for="charFont">字体：</label>
+                        <input type="text" id="charFont" name="charFont" required /><br /><br />
+                        <label for="charSource">来源：</label>
+                        <input type="text" id="charSource" name="charSource" required /><br /><br />
+                        <button type="button" id="submitInfoBtn" class="right-region-submit">提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- js脚本 -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // 检查当前页面的 URL 或其他标志
+                if (window.location.pathname.includes('/proof_page')) {
+                    document.getElementById('navbar').style.display = 'none';
+                }
+            });
+            const characterCandidates = [
+                { char: "權", similar_words: "权, 桮", top: 11, left: 474 },
+                { char: "也", similar_words: "他,她,地", top: 43, left: 474 },
+                { char: "史", similar_words: "吏,吏,使", top: 75, left: 474 },
+                { char: "則", similar_words: "财,则", top: 101, left: 474 },
+                { char: "衡", similar_words: "行,征", top: 128, left: 474 },
+                { char: "之", similar_words: "乏,乏", top: 156, left: 474 },
+                { char: "有", similar_words: "月, 右", top: 187, left: 473 },
+                { char: "輕", similar_words: "轻,鶸", top: 214, left: 473 },
+                { char: "重", similar_words: "垂", top: 246, left: 473 },
+                { char: "也", similar_words: "他,地", top: 273, left: 473 },
+                { char: "經", similar_words: "径,胫", top: 309, left: 473 },
+                { char: "猶", similar_words: "犹,鱿", top: 336, left: 473 },
+                { char: "度", similar_words: "渡,肚,杜", top: 13, left: 434 },
+                { char: "也", similar_words: "他,她,地", top: 46, left: 434 },
+                { char: "史", similar_words: "吏,使,事,市", top: 79, left: 434 },
+                { char: "則", similar_words: "财, 则, 侧", top: 106, left: 434 },
+                { char: "尺", similar_words: "尽,昼", top: 134, left: 434 },
+                { char: "之", similar_words: "乏,芝,支", top: 163, left: 434 },
+                { char: "有", similar_words: "右,左", top: 190, left: 434 },
+                { char: "短", similar_words: "矩,矩", top: 218, left: 434 },
+                { char: "長", similar_words: "张,胀", top: 251, left: 434 },
+                { char: "也", similar_words: "他,地,池,驰", top: 279, left: 433 },
+                { char: "古", similar_words: "吉, 圴", top: 312, left: 433 },
+                { char: "者", similar_words: "着,诸,猪", top: 335, left: 433 },
+                { char: "六", similar_words: "文,义", top: 14, left: 395 },
+                { char: "經", similar_words: "径,茎,泾,胫", top: 48, left: 395 },
+                { char: "之", similar_words: "芝,支,枝,止", top: 75, left: 395 },
+                { char: "學", similar_words: "斅,斈", top: 99, left: 395 },
+                { char: "專", similar_words: "专,转", top: 127, left: 395 },
+                { char: "門", similar_words: "间,闲,闭,问", top: 160, left: 395 },
+                { char: "名", similar_words: "多,各", top: 191, left: 395 },
+                { char: "家", similar_words: "室,居", top: 219, left: 395 },
+                { char: "各", similar_words: "洛,路,略", top: 248, left: 395 },
+                { char: "仞", similar_words: "认,忍,刃", top: 280, left: 395 },
+                { char: "師", similar_words: "帅,筛", top: 308, left: 395 },
+                { char: "說", similar_words: "说,兑", top: 336, left: 395 },
+                { char: "聖", similar_words: "圣,圣", top: 13, left: 355 },
+                { char: "贒", similar_words: "猴,猭", top: 46, left: 355 },
+                { char: "之", similar_words: "乏,乏", top: 74, left: 355 },
+                { char: "徵", similar_words: "征,徵", top: 101, left: 355 },
+                { char: "言", similar_words: "语,话,说", top: 129, left: 355 },
+                { char: "大", similar_words: "太,犬", top: 157, left: 356 },
+                { char: "義", similar_words: "义,议", top: 188, left: 356 },
+                { char: "綱", similar_words: "岡,崗,刚", top: 216, left: 356 },
+                { char: "舉", similar_words: "举,挙", top: 253, left: 356 },
+                { char: "目", similar_words: "日,曰", top: 280, left: 356 },
+                { char: "張", similar_words: "胀,帐", top: 308, left: 356 },
+                { char: "肌", similar_words: "饥,叽", top: 336, left: 356 },
+                { char: "劈", similar_words: "辟,霹", top: 11, left: 315 },
+                { char: "理", similar_words: "埋,埋", top: 45, left: 315 },
+                { char: "解", similar_words: "懈,獬", top: 73, left: 315 },
+                { char: "權", similar_words: "权,桊", top: 102, left: 316 },
+                { char: "衡", similar_words: "横,蘅", top: 135, left: 316 },
+                { char: "尺", similar_words: "尽,尸", top: 164, left: 316 },
+                { char: "度", similar_words: "渡,肚", top: 191, left: 316 },
+                { char: "𨯳", similar_words: "凿,翟", top: 220, left: 316 },
+                { char: "鑿", similar_words: "凿,翟", top: 254, left: 316 },
+                { char: "乎", similar_words: "呼,吁", top: 286, left: 316 },
+                { char: "楷", similar_words: "模,范,榜", top: 310, left: 316 },
+                { char: "定", similar_words: "足,是", top: 338, left: 317 },
+                { char: "於", similar_words: "于,予", top: 11, left: 275 },
+                { char: "胷", similar_words: "匈,胸", top: 45, left: 276 },
+                { char: "中", similar_words: "虫,串,巾", top: 73, left: 276 },
+                { char: "然", similar_words: "燃,染", top: 105, left: 276 },
+                { char: "後", similar_words: "后,逅,厚", top: 134, left: 276 },
+                { char: "出", similar_words: "山,击,岳", top: 162, left: 276 },
+                { char: "而", similar_words: "面,且,耳", top: 195, left: 277 },
+                { char: "從", similar_words: "从,丛", top: 223, left: 277 },
+                { char: "事", similar_words: "吏,史", top: 252, left: 277 },
+                { char: "于", similar_words: "子,干,予", top: 284, left: 277 },
+                { char: "史", similar_words: "吏,使,市,世,事", top: 312, left: 278 },
+                { char: "三", similar_words: "王,丰", top: 335, left: 278 },
+                { char: "才", similar_words: "寸,村", top: 12, left: 204 },
+                { char: "之", similar_words: "乏,乏", top: 45, left: 204 },
+                { char: "髙", similar_words: "蒿", top: 73, left: 204 },
+                { char: "下", similar_words: "卜,卞", top: 101, left: 204 },
+                { char: "百", similar_words: "白,自", top: 130, left: 204 },
+                { char: "世", similar_words: "叶,卅", top: 158, left: 204 },
+                { char: "之", similar_words: "芝,乏", top: 189, left: 204 },
+                { char: "往", similar_words: "住,拄", top: 218, left: 204 },
+                { char: "復", similar_words: "复,覆", top: 246, left: 204 },
+                { char: "分", similar_words: "份,扮", top: 275, left: 204 },
+                { char: "齊", similar_words: "齐,斉", top: 302, left: 204 },
+                { char: "其", similar_words: "具,真,典", top: 330, left: 204 },
+                { char: "輕", similar_words: "轻,经,径", top: 10, left: 164 },
+                { char: "重", similar_words: "童,里", top: 45, left: 164 },
+                { char: "短", similar_words: "矩,知", top: 74, left: 164 },
+                { char: "長", similar_words: "张,胀", top: 103, left: 164 },
+                { char: "取", similar_words: "耳,又", top: 132, left: 164 },
+                { char: "裁", similar_words: "栽,载,哉", top: 161, left: 164 },
+                { char: "于", similar_words: "子,予", top: 194, left: 164 },
+                { char: "吾", similar_words: "语,悟,误", top: 219, left: 163 },
+                { char: "之", similar_words: "乏,云", top: 248, left: 163 },
+                { char: "權", similar_words: "桗,灌", top: 277, left: 163 },
+                { char: "度", similar_words: "渡,肚", top: 306, left: 163 },
+                { char: "累", similar_words: "票,票,票", top: 334, left: 163 },
+                { char: "黍", similar_words: "黎,黎", top: 10, left: 125 },
+                { char: "杪", similar_words: "秒,炒", top: 43, left: 124 },
+                { char: "忽", similar_words: "匆,勿", top: 76, left: 124 },
+                { char: "罄", similar_words: "磬,馨", top: 109, left: 124 },
+                { char: "無", similar_words: "无,芜", top: 137, left: 124 },
+                { char: "不", similar_words: "木,杯,怀", top: 165, left: 123 },
+                { char: "冝", similar_words: "宜,宜", top: 194, left: 123 },
+                { char: "而", similar_words: "面,且,再", top: 222, left: 123 },
+                { char: "後", similar_words: "后,侯", top: 250, left: 123 },
+                { char: "可", similar_words: "叮,哥", top: 278, left: 123 },
+                { char: "以", similar_words: "似,己,巳", top: 307, left: 122 },
+                { char: "明", similar_words: "朋,月,日", top: 339, left: 122 },
+                { char: "體", similar_words: "体,礼,履", top: 9, left: 84 },
+                { char: "適", similar_words: "适,谪,敌,滴", top: 43, left: 84 },
+                { char: "用", similar_words: "周,同,由", top: 72, left: 84 },
+                { char: "為", similar_words: "为,伪", top: 104, left: 84 },
+                { char: "通", similar_words: "涌, 捅, 桶, 痛, 捅, 筒", top: 132, left: 83 },
+                { char: "天", similar_words: "大,夫,夭", top: 161, left: 83 },
+                { char: "地", similar_words: "池,他,她", top: 194, left: 83 },
+                { char: "人", similar_words: "大,个,入", top: 227, left: 83 },
+                { char: "之", similar_words: "乏, 乚", top: 255, left: 82 },
+                { char: "大", similar_words: "太,犬,天,夫,人", top: 278, left: 82 },
+                { char: "儒", similar_words: "孺,濡", top: 307, left: 82 },
+                { char: "有", similar_words: "右,友,酉", top: 340, left: 82 },
+                { char: "人", similar_words: "入,大,个,及", top: 10, left: 43 },
+                { char: "曰", similar_words: "日,白,自", top: 45, left: 43 },
+                { char: "我", similar_words: "找,戈", top: 73, left: 43 },
+                { char: "知", similar_words: "和, 如", top: 103, left: 42 },
+                { char: "輕", similar_words: "轻,经", top: 132, left: 42 },
+                { char: "重", similar_words: "童,量,里", top: 162, left: 42 },
+                { char: "我", similar_words: "找,戈,成,戍", top: 195, left: 42 },
+                { char: "知", similar_words: "智,支,枝", top: 224, left: 42 },
+                { char: "短", similar_words: "矩, 知, 智", top: 258, left: 42 },
+                { char: "長", similar_words: "长,张,胀", top: 282, left: 41 },
+                { char: "問", similar_words: "間,间", top: 312, left: 41 },
+                { char: "之", similar_words: "乏,匚", top: 341, left: 41 },
+                { char: "以", similar_words: "似,己,巳", top: 9, left: 3 },
+                { char: "權", similar_words: "桗,灌", top: 43, left: 3 },
+                { char: "度", similar_words: "渡,肚", top: 70, left: 3 },
+                { char: "茫", similar_words: "芒, 忘, 忙", top: 103, left: 3 },
+                { char: "如", similar_words: "姑, 茹", top: 135, left: 3 },
+                { char: "也", similar_words: "他,地", top: 167, left: 3 },
+                { char: "此", similar_words: "些,比,批,北", top: 195, left: 2 },
+                { char: "無", similar_words: "元, 天, 无", top: 227, left: 2 },
+                { char: "目", similar_words: "白,自", top: 259, left: 2 },
+                { char: "而", similar_words: "面,且,血,几", top: 286, left: 2 },
+                { char: "諍", similar_words: "争, 诤", top: 313, left: 2 },
+                { char: "曰", similar_words: "日,白", top: 341, left: 2 },
+            ];
+            // 获取candidateTextArea容器
+            const candidateTextArea = document.getElementById("candidateTextArea");
+
+            const imageContainer = document.querySelector(".image-container");
+            const highlightImage = document.getElementById("highlightImage");
+            const textArea = document.getElementById("textArea");
+
+            let selectedChar = null; // 用于存储选中的字
+            let selectedCharLocation = null; // 用于存储选中字的位置
+
+            // 存储原始的文字位置数据
+            let originalTextData = null;
+            let isRectsVisible = true;
+
+            let isColumnRectsVisible = false;
+
+            // 图片显隐状态管理
+            let isImageVisible = true;
+
+            let isTextVisible = true;
+
+            let fixedContent = "";
+
+            // 切换图片显隐状态
+            function toggleImageVisibility() {
+                if (isImageVisible) {
+                    highlightImage.style.display = "none";
+                } else {
+                    highlightImage.style.display = "block";
+                }
+                isImageVisible = !isImageVisible; // 切换状态
+            }
+
+            function toggleColumnRects() {
+                const columnRects = document.querySelectorAll(".column-rect");
+                columnRects.forEach((rect) => {
+                    rect.style.display = isColumnRectsVisible ? "none" : "block";
+                });
+                isColumnRectsVisible = !isColumnRectsVisible;
+            }
+
+            function toggleRectsVisibility() {
+                const rects = document.querySelectorAll(".text-rect");
+                rects.forEach((rect) => {
+                    rect.style.display = isRectsVisible ? "none" : "block";
+                });
+                isRectsVisible = !isRectsVisible; // 切换状态
+            }
+
+            function textVisibility() {
+                const textItems = document.querySelectorAll(".text-item");
+                textItems.forEach((textItem) => {
+                    textItem.style.display = isTextVisible ? "none" : "inline-block";
+                });
+                isTextVisible = !isTextVisible;
+            }
+
+            let fontSize = 16; // 初始缩放比例
+
+            document.querySelector('button[name="action"][value="字号增加"]').addEventListener("click", function (event) {
+                fontSize *= 1.1; // 每次增大字体10%
+                updateFontSize();
+            });
+
+            document.querySelector('button[name="action"][value="字号减小"]').addEventListener("click", function (event) {
+                fontSize *= 0.9; // 每次缩小字体10%
+                updateFontSize();
+            });
+            
+
+            function updateFontSize() {
+                const textItems = document.querySelectorAll(".text-item");
+                textItems.forEach(function (textItem) {
+                    textItem.style.fontSize = fontSize + "px";
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const ocrDataFilename = "1735462832433.json";
+                const textArea = document.getElementById("textArea");
+                let originalTextData = null;
+
+                // 加载 OCR 数据
+                fetch(`/static/ocr_data/${ocrDataFilename}`)
+                    .then((response) => response.json())
+                    .then((textData) => {
+                        originalTextData = textData;
+                        initializeTextHighlight(textData);
+                    })
+                    .catch((error) => {
+                        console.error("Error loading OCR data:", error);
+                    });
+
+                // 创建文字和对应的矩形框
+                function initializeTextHighlight(textData) {
+                    // 提取所有文字
+                    const allText = textData.map((line) => line.chars.map((char) => char.char).join("")).join("");
+                    fixedContent = allText;
+
+                    // 存储原始数据
+                    originalTextData = textData;
+
+                    textArea.innerHTML = ""; // 清空之前的文本
+                    imageContainer.querySelectorAll(".text-rect, .column-rect").forEach((rect) => rect.remove());
+
+                    textData.forEach((line, lineIndex) => {
+                        // console.log("line:", line);
+                        // console.log("line_location:", line.line_location);
+
+                        // 创建列框
+                        const columnRect = document.createElement("div");
+                        columnRect.classList.add("column-rect");
+                        columnRect.style.left = `${line.line_location.left}px`;
+                        columnRect.style.top = `${line.line_location.top}px`;
+                        columnRect.style.width = `${line.line_location.width}px`;
+                        columnRect.style.height = `${line.line_location.height}px`;
+                        columnRect.style.display = "none"; // 隐藏列框
+                        imageContainer.appendChild(columnRect);
+
+                        // 创建行容器
+                        const lineElement = document.createElement("div");
+                        lineElement.classList.add("text-line");
+
+                        line.chars.forEach((item, charIndex) => {
+                            // 创建文字元素
+                            const textElement = document.createElement("span");
+                            textElement.textContent = item.char;
+                            textElement.classList.add("text-item");
+                            textElement.dataset.lineIndex = lineIndex;
+                            textElement.dataset.charIndex = charIndex;
+                            lineElement.appendChild(textElement);
+
+                            // 创建矩形框
+                            const rectElement = document.createElement("div");
+                            rectElement.classList.add("text-rect");
+                            rectElement.style.left = `${item.location.left}px`;
+                            rectElement.style.top = `${item.location.top}px`;
+                            rectElement.style.width = `${item.location.width}px`;
+                            rectElement.style.height = `${item.location.height}px`;
+                            rectElement.dataset.lineIndex = lineIndex;
+                            rectElement.dataset.charIndex = charIndex;
+                            imageContainer.appendChild(rectElement);
+
+                            // 添加点击事件
+                            textElement.addEventListener("click", () => {
+                                // 隐藏所有矩形框
+                                document.querySelectorAll(".text-rect").forEach((rect) => {
+                                    rect.style.display = "none";
+                                });
+
+                                // 显示对应的矩形框
+                                const targetRect = document.querySelector(`.text-rect[data-line-index="${lineIndex}"][data-char-index="${charIndex}"], .column-rect[data-line-index="${lineIndex}"]`);
+                                targetRect.style.display = "block";
+
+                                // 记录选中的字符和位置信息
+                                selectedChar = item.char;
+                                selectedCharLocation = item.location;
+                                selectedCharLineIndex = lineIndex;
+                                selectedCharCharIndex = charIndex;
+                                console.log(`选中的字符left：${selectedCharLocation.left}`);
+                                console.log(`选中的字符top：${selectedCharLocation.top}`);
+                                console.log(`选中的字符：${selectedChar}`);
+
+                                // 根据选中的字符查找候选字
+                                displayCandidateWords(selectedChar, selectedCharLocation.left, selectedCharLocation.top, selectedCharLineIndex, selectedCharCharIndex);
+                            });
+                        });
+
+                        // 将行添加到文本区域
+                        textArea.appendChild(lineElement);
+                    });
+                }
+
+                let scaleFactor = 1; // 初始缩放比例
+
+                // 复制文本
+                document.getElementById("copyTextBtn").addEventListener("click", function () {
+                    navigator.clipboard
+                        .writeText(fixedContent)
+                        .then(() => {
+                            alert("文本已复制到剪贴板！"); // 提示用户复制成功
+                        })
+                        .catch((err) => {
+                            console.error("复制失败：", err);
+                            alert("复制失败，请检查浏览器支持情况。");
+                        });
+                });
+
+                // 放大按钮事件处理
+                document.getElementById("zoomInBtn").addEventListener("click", function () {
+                    scaleFactor *= 1.1; // 每次放大10%
+                    updateScale();
+                });
+
+                // 缩小按钮事件处理
+                document.getElementById("zoomOutBtn").addEventListener("click", function () {
+                    scaleFactor *= 0.9; // 每次缩小10%
+                    updateScale();
+                });
+
+                function updateScale() {
+                    // 放大/缩小图片
+
+                    // 更新矩形框的位置和尺寸
+                    document.querySelectorAll(".text-rect").forEach((rect) => {
+                        const lineIndex = parseInt(rect.dataset.lineIndex);
+                        const charIndex = parseInt(rect.dataset.charIndex);
+
+                        // 获取原始字符位置信息
+                        const originalCharLocation = originalTextData[lineIndex].chars[charIndex].location;
+
+                        // 按比例缩放矩形框
+                        rect.style.left = `${originalCharLocation.left * scaleFactor}px`;
+                        rect.style.top = `${originalCharLocation.top * scaleFactor}px`;
+                        rect.style.width = `${originalCharLocation.width * scaleFactor}px`;
+                        rect.style.height = `${originalCharLocation.height * scaleFactor}px`;
+                    });
+
+                    highlightImage.style.transform = `scale(${scaleFactor})`;
+                    highlightImage.style.transformOrigin = "top left";
+
+                    // 同时更新列框
+                    document.querySelectorAll(".column-rect").forEach((rect, lineIndex) => {
+                        const originalLineLocation = originalTextData[lineIndex].line_location;
+
+                        rect.style.left = `${originalLineLocation.left * scaleFactor}px`;
+                        rect.style.top = `${originalLineLocation.top * scaleFactor}px`;
+                        rect.style.width = `${originalLineLocation.width * scaleFactor}px`;
+                        rect.style.height = `${originalLineLocation.height * scaleFactor}px`;
+                    });
+                }
+
+                // 启用编辑模式
+                document.querySelector('button[name="action"][value="编辑文本"]').addEventListener("click", function (event) {
+                    event.preventDefault();
+
+                    const textArea = document.getElementById("textArea");
+                    const isEditable = textArea.classList.contains("editable-text");
+
+                    if (isEditable) {
+                        // 关闭编辑模式
+                        textArea.classList.remove("editable-text");
+                        document.querySelectorAll(".text-item").forEach((item) => {
+                            item.removeAttribute("contenteditable");
+                        });
+                    } else {
+                        // 启用编辑模式
+                        textArea.classList.add("editable-text");
+                        document.querySelectorAll(".text-item").forEach((item) => {
+                            item.setAttribute("contenteditable", "true");
+
+                            // 监听输入事件，确保不删除 text-item
+                            item.addEventListener("input", function () {
+                                if (item.textContent === "") {
+                                    item.textContent = " "; // 保留 text-item，显示空格作为占位符
+                                }
+                            });
+
+                            // 监听键盘事件，防止删除 text-item
+                            item.addEventListener("keydown", function (event) {
+                                if (event.key === "Backspace" && item.textContent.trim() === "") {
+                                    event.preventDefault(); // 禁止删除 text-item
+                                }
+                            });
+                        });
+                    }
+                });
+
+                // 保存按钮的点击事件处理
+                document.querySelector('button[name="action"][value="保存"]').addEventListener("click", function (event) {
+                    event.preventDefault();
+
+                    // 检查是否处于可编辑状态
+                    const textArea = document.getElementById("textArea");
+                    const isEditable = textArea.classList.contains("editable-text");
+
+                    if (!isEditable) {
+                        alert("请先点击编辑文本按钮进行编辑");
+                        return;
+                    }
+
+                    // 遍历所有文字元素，找出被修改的字符
+                    const lines = textArea.querySelectorAll(".text-line");
+                    lines.forEach((lineElement, lineIndex) => {
+                        const chars = lineElement.querySelectorAll(".text-item");
+
+                        chars.forEach((charElement, charIndex) => {
+                            const originalChar = originalTextData[lineIndex].chars[charIndex].char;
+                            const currentChar = charElement.textContent.trim() || " "; // 处理空字符的情况
+
+                            // 如果字符发生变化，则发送保存请求
+                            if (originalChar !== currentChar) {
+                                fetch("/save_ocr_data", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        original_filename: ocrDataFilename,
+                                        line_index: lineIndex,
+                                        char_index: charIndex,
+                                        new_char: currentChar,
+                                    }),
+                                })
+                                    .then((response) => response.json())
+                                    .then((result) => {
+                                        if (result.status === "success") {
+                                            originalTextData[lineIndex].chars[charIndex].char = currentChar;
+                                            alert(`字符 "${originalChar}" 已成功更新为 "${currentChar}"`);
+                                        } else {
+                                            alert("保存失败：" + result.message);
+                                        }
+                                    })
+                                    .catch((error) => {
+                                        console.error("保存失败:", error);
+                                        alert("保存过程中出现错误");
+                                    });
+                            }
+                        });
+                    });
+                });
+
+                // 添加列框按钮事件监听
+                document.querySelector('button[name="action"][value="列框"]').addEventListener("click", (event) => {
+                    event.preventDefault();
+                    toggleColumnRects();
+                });
+
+                document.querySelector('button[name="action"][value="字框"]').addEventListener("click", (event) => {
+                    event.preventDefault(); // 阻止默认表单提交行为
+                    toggleRectsVisibility();
+                });
+
+                document.querySelector('button[name="action"][value="图片显隐"]').addEventListener("click", (event) => {
+                    event.preventDefault();
+                    toggleImageVisibility();
+                });
+
+                document.querySelector('button[name="action"][value="文本显隐"]').addEventListener("click", (event) => {
+                    event.preventDefault();
+                    textVisibility();
+                });
+
+                // 给表单中的提交按钮添加事件
+                document.getElementById("submitInfoBtn").addEventListener("click", function () {
+                    if (!selectedChar) {
+                        alert("请选中字后再进行操作");
+                        return;
+                    }
+
+                    // 获取用户填写的字的内容、作者、字体、来源
+                    const charContent = document.getElementById("charContent").value;
+                    const charAuthor = document.getElementById("charAuthor").value;
+                    const charFont = document.getElementById("charFont").value;
+                    const charSource = document.getElementById("charSource").value;
+
+                    if (!charContent || !charAuthor || !charFont || !charSource) {
+                        alert("请填写所有信息！");
+                        return;
+                    }
+                    
+                    // 获取当前HTML文件名
+                    const currentPath = window.location.pathname;
+                    const filename = currentPath.split('/').pop();  // 获取路径最后一部分
+                    // 使用正则表达式提取数字
+                    const timestamp = filename.match(/\d+/)[0];  // 提取连续数字
+                    console.log("timestamp:", timestamp);
+
+                    // 发送所有数据到后端
+                    fetch("/upload_char_info", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            char: selectedChar,
+                            top: selectedCharLocation.top,
+                            left: selectedCharLocation.left,
+                            char_content: charContent,
+                            char_author: charAuthor,
+                            char_font: charFont,
+                            char_source: charSource,
+                            timestamp: timestamp,  // 添加时间戳
+                        }),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.status === "success") {
+                                alert("信息上传成功！");
+                            } else {
+                                alert("上传失败：" + data.message);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("上传失败:", error);
+                            alert("上传过程中出现错误");
+                        });
+                });
+
+                document.querySelector('button[value="添加到集字"]').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (!selectedChar) {
+                        alert("请先选择要收藏的字");
+                        return;
+                    }
+
+                    // 获取当前HTML文件名中的时间戳
+                    const currentPath = window.location.pathname;
+                    const filename = currentPath.split('/').pop();
+                    const timestamp = filename.match(/\d+/)?.[0];
+
+                    // 只发送必要的信息，让后端去匹配文件
+                    const data = {
+                        character: selectedChar,
+                        timestamp: timestamp,
+                        top: selectedCharLocation.top,
+                        left: selectedCharLocation.left
+                    };
+
+                    // 发送请求到后端
+                    fetch("/add_to_favourite", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('网络响应错误');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === "success") {
+                            alert("成功添加到集字库！");
+                        } else {
+                            alert(data.message || "添加失败，请重试");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("添加到集字库失败:", error);
+                        alert("添加失败，请稍后重试");
+                    });
+                });
+
+            });
+
+            function displayCandidateWords(selectedChar, selectedCharLeft, selectedCharTop, selectedCharLineIndex, selectedCharCharIndex) {
+                // 清空候选字区域
+                candidateTextArea.innerHTML = "";
+
+                // 查找与选中字符匹配的候选字
+                const candidate = characterCandidates.find((item) => item.left === selectedCharLeft && item.top === selectedCharTop);
+
+                if (candidate) {
+                    const similarWords = candidate.similar_words.split(","); // 分割候选字
+                    similarWords.forEach((word) => {
+                        // 创建按钮元素
+                        const candidateButton = document.createElement("button");
+                        candidateButton.textContent = word.trim(); // 去除空格
+                        candidateButton.classList.add("candidate-item");
+                        candidateButton.classList.add("candidate-button"); // 给按钮添加样式类
+
+                        // 点击按钮时替换选中的字
+                        candidateButton.addEventListener("click", () => {
+                            const textArea = document.getElementById("textArea");
+                            const isEditable = textArea.classList.contains("editable-text");
+                            if (isEditable) {
+                                const textElement = document.querySelector(`.text-item[data-line-index="${selectedCharLineIndex}"][data-char-index="${selectedCharCharIndex}"]`);
+
+                                // 调试日志：查看是否能找到正确的文本元素
+                                console.log(`lineIndex: ${selectedCharLineIndex}, charIndex: ${selectedCharCharIndex}`);
+                                console.log(textElement); // 输出查看是否找到了目标元素
+
+                                // 如果找到了目标元素，则替换文本
+                                if (textElement) {
+                                    textElement.textContent = word.trim();
+                                    console.log(`选中的字已替换为: ${word.trim()}`);
+                                } else {
+                                    console.log("找不到目标字符元素，请检查 data-line-index 和 data-char-index 是否匹配");
+                                }
+                            }
+                        });
+
+                        // 将按钮添加到候选字区域
+                        candidateTextArea.appendChild(candidateButton);
+                    });
+                } else {
+                    // 如果没有找到候选字，显示提示信息
+                    const noCandidates = document.createElement("span");
+                    noCandidates.textContent = "没有找到候选字";
+                    noCandidates.classList.add("candidate-item");
+                    candidateTextArea.appendChild(noCandidates);
+                }
+            }
+
+
+            // 获取转发按钮
+            const shareButton = document.querySelector('button[value="转发页面"]');
+
+            // 定义发帖接口的URL
+            const POST_API_URL = '/post/create';  // 修改为正确的路由
+
+            shareButton.addEventListener('click', async function() {
+                try {
+                    // 获取当前iframe的URL
+                    const currentPageUrl = window.location.href;
+                    
+                    // 获取图片信息
+                    const image = document.getElementById('highlightImage');
+                    const imageUrl = image.src;
+                    const imageName = imageUrl.split('/').pop();
+                    
+                    // 获取文本内容
+                    const textArea = document.querySelector('.text-area');
+                    const textContent = (textArea && textArea.innerText) ? textArea.innerText.trim() : '分享一个识别结果';
+                    
+                    if (!textContent) {
+                        throw new Error('文本内容不能为空');
+                    }
+
+                    // 创建 FormData 对象
+                    const formData = new FormData();
+                    formData.append('content', `${textContent}\n\n查看原页面：${currentPageUrl}`);
+
+                    // 获取图片文件
+                    // 注意：这里需要先把图片URL转换为文件
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const file = new File([blob], imageName, { type: blob.type });
+                    formData.append('images', file);
+
+                    // 发送POST请求
+                    const postResponse = await fetch(POST_API_URL, {
+                        method: 'POST',
+                        body: formData  // 不需要设置 Content-Type，浏览器会自动设置
+                    });
+
+                    if (postResponse.ok) {
+                        const result = await postResponse.json();
+                        if (result.success) {
+                            window.location.href = '/forum';
+                        } else {
+                            throw new Error(result.message || '发帖失败');
+                        }
+                    } else {
+                        throw new Error('发帖失败');
+                    }
+                } catch (error) {
+                    console.error('转发失败:', error);
+                    alert(error.message || '转发失败，请稍后重试');
+                }
+            });
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-ep+dxp/oz2RKF89ALMPGc7Z89QFa32C8Uv1A3TcEK8sMzXVysblLA3+eJWTzPJzT" crossorigin="anonymous"></script>
+    </body>
+</html>

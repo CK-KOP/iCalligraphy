@@ -54,6 +54,9 @@
                     <button type="submit" name="action" value="转发页面" class="no-border-button" title="转发页面">
                         <img src="{{ url_for('static', filename='imgs/share_page.png') }}" alt="转发页面" width="40" height="40" />
                     </button>
+                    <button type="submit" name="action" value="添加到集字" class="no-border-button" title="添加到集字">
+                        <img src="{{ url_for('static', filename='imgs/add_favourite.png') }}" alt="添加到集字" width="40" height="40" />
+                    </button>
                 </div>
             </div>
         </nav>
@@ -646,6 +649,55 @@
                             alert("上传过程中出现错误");
                         });
                 });
+
+                document.querySelector('button[value="添加到集字"]').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (!selectedChar) {
+                        alert("请先选择要收藏的字");
+                        return;
+                    }
+
+                    // 获取当前HTML文件名中的时间戳
+                    const currentPath = window.location.pathname;
+                    const filename = currentPath.split('/').pop();
+                    const timestamp = filename.match(/\d+/)?.[0];
+
+                    // 只发送必要的信息，让后端去匹配文件
+                    const data = {
+                        character: selectedChar,
+                        timestamp: timestamp,
+                        top: selectedCharLocation.top,
+                        left: selectedCharLocation.left
+                    };
+
+                    // 发送请求到后端
+                    fetch("/add_to_favourite", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('网络响应错误');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === "success") {
+                            alert("成功添加到集字库！");
+                        } else {
+                            alert(data.message || "添加失败，请重试");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("添加到集字库失败:", error);
+                        alert("添加失败，请稍后重试");
+                    });
+                });
+
             });
 
             function displayCandidateWords(selectedChar, selectedCharLeft, selectedCharTop, selectedCharLineIndex, selectedCharCharIndex) {

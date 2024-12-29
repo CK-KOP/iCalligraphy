@@ -148,9 +148,6 @@ function setupSearchHandlers() {
 
 }
 
-
-
-
 function displayResults(searchData, data) {
     const resultsContainer = document.getElementById('resultsContainer');
     resultsContainer.innerHTML = ''; // 清空之前的结果
@@ -178,8 +175,17 @@ function createResultCard(item, type) {
 
     if (type === 'calligraphy') {
         const container = document.createElement('div');
-        container.className = 'svg-container';
-        container.innerHTML = item.svgContent;
+        
+        if (item.is_svg) {
+            container.className = 'svg-container';
+            container.innerHTML = item.svgContent;
+        } else {
+            container.className = 'img-container';
+            const img = document.createElement('img');
+            img.src = item.imageData;
+            img.alt = item.info;
+            container.appendChild(img);
+        }
         
         const info = document.createElement('div');
         info.className = 'result-info';
@@ -188,6 +194,7 @@ function createResultCard(item, type) {
         card.appendChild(container);
         card.appendChild(info);
     } else {
+        // Artwork display logic remains unchanged
         const img = document.createElement('img');
         img.src = item.imageUrl;
         img.alt = '书法作品';
@@ -208,7 +215,6 @@ function createResultCard(item, type) {
     card.addEventListener('click', () => {
         showModal(item, type);
     });
-
 
     return card;
 }
@@ -275,13 +281,18 @@ function setupModal() {
         else {
             // 其他艺术作品直接下载
             const modalImg = document.getElementById('modalImage');
-            const link = document.createElement('a');
-            link.href = modalImg.src;
-            link.setAttribute('download', '书法作品.jpg'); // 设置下载的文件名
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
+            if (modalImg && modalImg.src) {
+                const link = document.createElement('a');
+                link.href = modalImg.src;
+                link.setAttribute('download', '书法作品.jpg'); // 设置下载的文件名
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                console.error('图片未找到或图片路径无效');
+            }
+
+
         }
     });
 
@@ -294,47 +305,55 @@ function showModal(item, type) {
     const modalInfo = document.getElementById('modalInfo');
     const favoriteButton = document.getElementById('favoriteButton');
 
-    // 清理之前插入的 SVG 或图片
+    // 清理之前的内容
     const existingSvgContainer = document.querySelector('.modal-svg-container');
     if (existingSvgContainer) {
         existingSvgContainer.remove();
     }
-    modalImg.src = ''; // 清空图片链接，避免累积
+    modalImg.src = '';
+    modalImg.style.display = 'none';
 
     modalContent.dataset.type = type;
 
-    // 重要：移除之前的事件监听器
+    // 重置收藏按钮
     favoriteButton.replaceWith(favoriteButton.cloneNode(true));
-    // 重新获取新的按钮引用
     const newFavoriteButton = document.getElementById('favoriteButton');
     
     if (type === 'calligraphy') {
-        // 设置模态框和内容的具体尺寸
         modalContent.style.width = '50vw';
         modalContent.style.height = '80vh';
         modalContent.dataset.vectorId = item.vectorId;
 
-        const svgContainer = document.createElement('div');
-        svgContainer.className = 'modal-svg-container';
-        svgContainer.innerHTML = item.svgContent;
-        
-        // 设置 SVG 容器的宽高
-        svgContainer.style.width = '100%';
-        svgContainer.style.height = '70vh';
+        if (item.is_svg) {
+            // SVG 显示处理
+            const svgContainer = document.createElement('div');
+            svgContainer.className = 'modal-svg-container';
+            svgContainer.innerHTML = item.svgContent;
+            svgContainer.style.width = '100%';
+            svgContainer.style.height = '70vh';
+            modalImg.parentElement.insertBefore(svgContainer, modalImg);
+        } else {
+            // 图片显示处理
+            modalImg.style.display = 'block';
+            modalImg.src = item.imageData;
+            modalImg.style.width = 'auto';
+            modalImg.style.height = '70vh';
+            modalImg.style.objectFit = 'contain';
+        }
 
-        modalImg.style.display = 'none';
-        modalImg.parentElement.insertBefore(svgContainer, modalImg);
         modalInfo.innerHTML = `<p>${item.info}</p>`;
         newFavoriteButton.style.display = 'block';
 
-        // 为新按钮添加事件监听器
+        // 添加收藏功能
         newFavoriteButton.addEventListener('click', async () => {
-            // 禁用按钮防止重复点击
             newFavoriteButton.disabled = true;
-            await addToFavourites(item.info, item.svgContent);
+            // 根据内容类型选择要保存的内容
+            const contentToSave = item.is_svg ? item.svgContent : item.imageData;
+            await addToFavourites(item.info, contentToSave, item.is_svg);
             newFavoriteButton.disabled = false;
         });
     } else {
+        // 作品展示逻辑保持不变
         modalImg.style.display = 'block';
         modalImg.src = item.imageUrl;
         modalInfo.innerHTML = `
@@ -391,31 +410,30 @@ function createAlert(message, type = 'success') {
     }, 3000);
 }
 
-// 在 addToFavourites 函数中使用新的提示方式
-async function addToFavourites(info, svgContent) {
-    console.log('添加收藏:', info, svgContent);
+
+// 更新收藏功能以支持两种格式
+async function addToFavourites(info, content, is_svg) {
     try {
         const response = await fetch('/add_favourite', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 info: info,
-                svgContent: svgContent 
+                content: content,
+                is_svg: is_svg
             })
         });
 
-        const result = await response.json();
-        console.log('收藏结果:', result);
-        
+        const data = await response.json();
         if (response.ok) {
-            createAlert(result.message, 'success');
+            alert('收藏成功！');
         } else {
-            throw new Error(result.error);
+            alert(data.error || '收藏失败，请重试');
         }
     } catch (error) {
-        console.error('收藏出错:', error);
-        createAlert(error.message || '收藏过程中发生错误', 'error');
+        console.error('Error:', error);
+        alert('收藏失败，请重试');
     }
 }

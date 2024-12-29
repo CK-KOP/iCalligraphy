@@ -195,59 +195,96 @@ function createCollectionCard(image) {
 }
 
 // 处理卡片点击
-function handleCardClick() {
-    const isSvg = $(this).find('.svg-container').length > 0;
-    let content;
+async function handleCardClick() {
+    const card = $(this);
+    const cardId = card.data('id');
+    const isSvg = card.find('.svg-container').length > 0;
+    const isPersonalLibrary = libraryToggle.value === 'personal';
+    
+    try {
+        if (isSvg) {
+            // 处理SVG内容
+            const content = {
+                type: 'svg',
+                data: card.find('.svg-container').html(),
+                description: card.find('.collection-card-details p').text(),
+                id: cardId,
+                library: isPersonalLibrary ? 'personal' : 'system'
+            };
+            selectedItems.push(content);
+            updatePreviewStyle();
+        } else {
+            // 显示加载指示器
+            loading.style.display = 'block';
+            
+            // 发送图片处理请求
+            const response = await fetch('/api/process_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    character_id: cardId,
+                    library_type: isPersonalLibrary ? 'personal' : 'system'
+                })
+            });
 
-    if (isSvg) {
-        content = {
-            type: 'svg',
-            data: $(this).find('.svg-container').html(),
-            description: $(this).find('.collection-card-details p').text()
-        };
-    } else {
-        content = {
-            type: 'image',
-            data: $(this).find('img').attr('src'),
-            description: $(this).find('.collection-card-details p').text()
-        };
+            if (!response.ok) {
+                throw new Error('Image processing failed');
+            }
+
+            // 创建blob URL
+            const blob = await response.blob();
+            const processedImageUrl = URL.createObjectURL(blob);
+            
+            // 创建新的内容对象
+            const content = {
+                type: 'image',
+                data: processedImageUrl,
+                description: card.find('.collection-card-details p').text(),
+                id: cardId,
+                library: isPersonalLibrary ? 'personal' : 'system'
+            };
+            
+            selectedItems.push(content);
+            updatePreviewStyle();
+        }
+    } catch (error) {
+        console.error('处理图片失败:', error);
+        alert('处理图片失败，请重试');
+    } finally {
+        loading.style.display = 'none';
     }
-
-    selectedItems.push(content);
-    updatePreviewStyle();
 }
 
-// 修改创建预览项的函数
+// 修改createPreviewItem函数
 function createPreviewItem(content) {
     const container = document.createElement('div');
     container.className = 'preview-character';
+    container.dataset.id = content.id;
+    container.dataset.library = content.library;
     
     // 计算等比例缩放后的宽度和高度
     const scaledWidth = baseSettings.width * scale;
     container.style.width = `${scaledWidth}px`;
 
     if (content.type === 'svg') {
-        // 处理SVG内容
+        // SVG处理逻辑保持不变
         let svgContent = content.data;
-        
-        // 移除所有背景相关属性
         svgContent = svgContent.replace(/style="[^"]*background[^"]*"/g, '');
         svgContent = svgContent.replace(/background[^;]*;/g, '');
         svgContent = svgContent.replace(/fill="white"/g, 'fill="none"');
         
-        // 解析SVG并设置属性
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
         const svgElement = svgDoc.documentElement;
         
         if (svgElement) {
-            // 确保SVG是等比例缩放的
             svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
             svgElement.style.width = '100%';
             svgElement.style.height = '100%';
             svgElement.style.background = 'none';
             
-            // 移除所有子元素的背景
             const allElements = svgElement.getElementsByTagName('*');
             for (let elem of allElements) {
                 elem.style.background = 'none';
@@ -256,7 +293,7 @@ function createPreviewItem(content) {
             container.innerHTML = svgElement.outerHTML;
         }
     } else {
-        // 处理图片内容
+        // 处理图片
         const img = document.createElement('img');
         img.src = content.data;
         img.alt = content.description;
@@ -266,10 +303,14 @@ function createPreviewItem(content) {
         container.appendChild(img);
     }
 
-    // 添加点击删除功能
+    // 添加点击删除功能，包括清理blob URL
     container.addEventListener('click', function() {
         const index = selectedItems.indexOf(content);
         if (index > -1) {
+            if (content.type === 'image') {
+                // 清理blob URL
+                URL.revokeObjectURL(content.data);
+            }
             selectedItems.splice(index, 1);
         }
         this.remove();
@@ -320,13 +361,13 @@ function updatePreviewStyle() {
     document.getElementById('zoomValue').textContent = `${Math.round(scale * 100)}%`;
 }
 
-// 处理保存
+// 修改handleSave函数以清理blob URLs
 function handleSave() {
-    const title = document.getElementById('titleInput').value.trim(); // 去除多余空格
+    const title = document.getElementById('titleInput').value.trim();
 
     if (!title) {
         alert('字帖标题不能为空！');
-        return; // 阻止提交
+        return;
     }
     
     html2canvas(previewContainer, {
@@ -354,6 +395,13 @@ function handleSave() {
                 $('#downloadLink').html(
                     `<a href="${data.downloadUrl}" target="_blank" download>点击下载字帖</a>`
                 );
+                
+                // 清理所有blob URLs
+                selectedItems.forEach(item => {
+                    if (item.type === 'image') {
+                        URL.revokeObjectURL(item.data);
+                    }
+                });
             } else {
                 alert('字帖保存成功，但未生成下载链接！');
             }
