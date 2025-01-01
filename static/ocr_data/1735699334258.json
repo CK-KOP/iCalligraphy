@@ -1,0 +1,1430 @@
+[
+    {
+        "line_text": "權也史則衡之有輕重也經猶",
+        "line_location": {
+            "top": 11,
+            "left": 473,
+            "width": 33,
+            "height": 344
+        },
+        "chars": [
+            {
+                "char": "權",
+                "location": {
+                    "top": 11,
+                    "left": 474,
+                    "width": 31,
+                    "height": 29
+                }
+            },
+            {
+                "char": "也",
+                "location": {
+                    "top": 44,
+                    "left": 474,
+                    "width": 31,
+                    "height": 27
+                }
+            },
+            {
+                "char": "史",
+                "location": {
+                    "top": 75,
+                    "left": 474,
+                    "width": 31,
+                    "height": 23
+                }
+            },
+            {
+                "char": "則",
+                "location": {
+                    "top": 102,
+                    "left": 474,
+                    "width": 31,
+                    "height": 23
+                }
+            },
+            {
+                "char": "衡",
+                "location": {
+                    "top": 129,
+                    "left": 473,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 157,
+                    "left": 473,
+                    "width": 32,
+                    "height": 27
+                }
+            },
+            {
+                "char": "有",
+                "location": {
+                    "top": 188,
+                    "left": 473,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "輕",
+                "location": {
+                    "top": 216,
+                    "left": 473,
+                    "width": 32,
+                    "height": 27
+                }
+            },
+            {
+                "char": "重",
+                "location": {
+                    "top": 247,
+                    "left": 473,
+                    "width": 31,
+                    "height": 24
+                }
+            },
+            {
+                "char": "也",
+                "location": {
+                    "top": 275,
+                    "left": 473,
+                    "width": 31,
+                    "height": 32
+                }
+            },
+            {
+                "char": "經",
+                "location": {
+                    "top": 310,
+                    "left": 473,
+                    "width": 31,
+                    "height": 24
+                }
+            },
+            {
+                "char": "猶",
+                "location": {
+                    "top": 338,
+                    "left": 473,
+                    "width": 31,
+                    "height": 17
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "度他史則尺之有短長也古者",
+        "line_location": {
+            "top": 13,
+            "left": 433,
+            "width": 34,
+            "height": 342
+        },
+        "chars": [
+            {
+                "char": "度",
+                "location": {
+                    "top": 13,
+                    "left": 434,
+                    "width": 32,
+                    "height": 29
+                }
+            },
+            {
+                "char": "他",
+                "location": {
+                    "top": 46,
+                    "left": 434,
+                    "width": 32,
+                    "height": 28
+                }
+            },
+            {
+                "char": "史",
+                "location": {
+                    "top": 79,
+                    "left": 434,
+                    "width": 32,
+                    "height": 23
+                }
+            },
+            {
+                "char": "則",
+                "location": {
+                    "top": 106,
+                    "left": 434,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "尺",
+                "location": {
+                    "top": 134,
+                    "left": 434,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 163,
+                    "left": 434,
+                    "width": 32,
+                    "height": 23
+                }
+            },
+            {
+                "char": "有",
+                "location": {
+                    "top": 190,
+                    "left": 434,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "短",
+                "location": {
+                    "top": 218,
+                    "left": 433,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "長",
+                "location": {
+                    "top": 251,
+                    "left": 433,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "也",
+                "location": {
+                    "top": 279,
+                    "left": 433,
+                    "width": 33,
+                    "height": 28
+                }
+            },
+            {
+                "char": "古",
+                "location": {
+                    "top": 312,
+                    "left": 433,
+                    "width": 33,
+                    "height": 19
+                }
+            },
+            {
+                "char": "者",
+                "location": {
+                    "top": 335,
+                    "left": 433,
+                    "width": 33,
+                    "height": 20
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "六經之學專門名家各仞師說",
+        "line_location": {
+            "top": 14,
+            "left": 395,
+            "width": 33,
+            "height": 340
+        },
+        "chars": [
+            {
+                "char": "六",
+                "location": {
+                    "top": 14,
+                    "left": 395,
+                    "width": 32,
+                    "height": 29
+                }
+            },
+            {
+                "char": "經",
+                "location": {
+                    "top": 48,
+                    "left": 395,
+                    "width": 32,
+                    "height": 23
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 75,
+                    "left": 395,
+                    "width": 32,
+                    "height": 20
+                }
+            },
+            {
+                "char": "學",
+                "location": {
+                    "top": 99,
+                    "left": 395,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "專",
+                "location": {
+                    "top": 127,
+                    "left": 395,
+                    "width": 32,
+                    "height": 28
+                }
+            },
+            {
+                "char": "門",
+                "location": {
+                    "top": 160,
+                    "left": 395,
+                    "width": 32,
+                    "height": 27
+                }
+            },
+            {
+                "char": "名",
+                "location": {
+                    "top": 191,
+                    "left": 395,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "家",
+                "location": {
+                    "top": 219,
+                    "left": 395,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "各",
+                "location": {
+                    "top": 248,
+                    "left": 395,
+                    "width": 32,
+                    "height": 28
+                }
+            },
+            {
+                "char": "仞",
+                "location": {
+                    "top": 280,
+                    "left": 395,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "師",
+                "location": {
+                    "top": 308,
+                    "left": 395,
+                    "width": 32,
+                    "height": 23
+                }
+            },
+            {
+                "char": "說",
+                "location": {
+                    "top": 336,
+                    "left": 395,
+                    "width": 32,
+                    "height": 18
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "聖贒之徵言大義綱舉目張肌",
+        "line_location": {
+            "top": 13,
+            "left": 355,
+            "width": 34,
+            "height": 341
+        },
+        "chars": [
+            {
+                "char": "聖",
+                "location": {
+                    "top": 13,
+                    "left": 355,
+                    "width": 32,
+                    "height": 29
+                }
+            },
+            {
+                "char": "贒",
+                "location": {
+                    "top": 46,
+                    "left": 355,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 74,
+                    "left": 355,
+                    "width": 32,
+                    "height": 23
+                }
+            },
+            {
+                "char": "徵",
+                "location": {
+                    "top": 101,
+                    "left": 355,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "言",
+                "location": {
+                    "top": 129,
+                    "left": 355,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "大",
+                "location": {
+                    "top": 157,
+                    "left": 356,
+                    "width": 32,
+                    "height": 27
+                }
+            },
+            {
+                "char": "義",
+                "location": {
+                    "top": 188,
+                    "left": 356,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "綱",
+                "location": {
+                    "top": 216,
+                    "left": 356,
+                    "width": 32,
+                    "height": 33
+                }
+            },
+            {
+                "char": "舉",
+                "location": {
+                    "top": 253,
+                    "left": 356,
+                    "width": 32,
+                    "height": 23
+                }
+            },
+            {
+                "char": "目",
+                "location": {
+                    "top": 280,
+                    "left": 356,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "張",
+                "location": {
+                    "top": 308,
+                    "left": 356,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "肌",
+                "location": {
+                    "top": 336,
+                    "left": 357,
+                    "width": 32,
+                    "height": 19
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "劈理解權衡尺度𨯳鑿乎楷定",
+        "line_location": {
+            "top": 11,
+            "left": 315,
+            "width": 35,
+            "height": 345
+        },
+        "chars": [
+            {
+                "char": "劈",
+                "location": {
+                    "top": 11,
+                    "left": 315,
+                    "width": 33,
+                    "height": 30
+                }
+            },
+            {
+                "char": "理",
+                "location": {
+                    "top": 46,
+                    "left": 315,
+                    "width": 33,
+                    "height": 23
+                }
+            },
+            {
+                "char": "解",
+                "location": {
+                    "top": 73,
+                    "left": 316,
+                    "width": 32,
+                    "height": 25
+                }
+            },
+            {
+                "char": "權",
+                "location": {
+                    "top": 102,
+                    "left": 316,
+                    "width": 32,
+                    "height": 29
+                }
+            },
+            {
+                "char": "衡",
+                "location": {
+                    "top": 135,
+                    "left": 316,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "尺",
+                "location": {
+                    "top": 163,
+                    "left": 316,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "度",
+                "location": {
+                    "top": 191,
+                    "left": 316,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "𨯳",
+                "location": {
+                    "top": 220,
+                    "left": 316,
+                    "width": 33,
+                    "height": 30
+                }
+            },
+            {
+                "char": "鑿",
+                "location": {
+                    "top": 254,
+                    "left": 316,
+                    "width": 33,
+                    "height": 28
+                }
+            },
+            {
+                "char": "乎",
+                "location": {
+                    "top": 286,
+                    "left": 316,
+                    "width": 33,
+                    "height": 20
+                }
+            },
+            {
+                "char": "楷",
+                "location": {
+                    "top": 310,
+                    "left": 316,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "定",
+                "location": {
+                    "top": 338,
+                    "left": 316,
+                    "width": 33,
+                    "height": 19
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "於胷中然後出而從事于史三",
+        "line_location": {
+            "top": 11,
+            "left": 275,
+            "width": 36,
+            "height": 345
+        },
+        "chars": [
+            {
+                "char": "於",
+                "location": {
+                    "top": 11,
+                    "left": 275,
+                    "width": 33,
+                    "height": 30
+                }
+            },
+            {
+                "char": "胷",
+                "location": {
+                    "top": 45,
+                    "left": 275,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "中",
+                "location": {
+                    "top": 74,
+                    "left": 276,
+                    "width": 32,
+                    "height": 27
+                }
+            },
+            {
+                "char": "然",
+                "location": {
+                    "top": 105,
+                    "left": 276,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "後",
+                "location": {
+                    "top": 134,
+                    "left": 276,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "出",
+                "location": {
+                    "top": 163,
+                    "left": 276,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "而",
+                "location": {
+                    "top": 196,
+                    "left": 277,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "從",
+                "location": {
+                    "top": 224,
+                    "left": 277,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "事",
+                "location": {
+                    "top": 253,
+                    "left": 277,
+                    "width": 33,
+                    "height": 28
+                }
+            },
+            {
+                "char": "于",
+                "location": {
+                    "top": 285,
+                    "left": 277,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "史",
+                "location": {
+                    "top": 313,
+                    "left": 277,
+                    "width": 33,
+                    "height": 19
+                }
+            },
+            {
+                "char": "三",
+                "location": {
+                    "top": 336,
+                    "left": 278,
+                    "width": 32,
+                    "height": 21
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "才之髙下百世之往復分齊其",
+        "line_location": {
+            "top": 12,
+            "left": 204,
+            "width": 34,
+            "height": 346
+        },
+        "chars": [
+            {
+                "char": "才",
+                "location": {
+                    "top": 12,
+                    "left": 204,
+                    "width": 32,
+                    "height": 29
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 45,
+                    "left": 204,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "髙",
+                "location": {
+                    "top": 73,
+                    "left": 204,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "下",
+                "location": {
+                    "top": 101,
+                    "left": 204,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "百",
+                "location": {
+                    "top": 130,
+                    "left": 204,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "世",
+                "location": {
+                    "top": 158,
+                    "left": 204,
+                    "width": 33,
+                    "height": 27
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 189,
+                    "left": 204,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "往",
+                "location": {
+                    "top": 218,
+                    "left": 204,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "復",
+                "location": {
+                    "top": 246,
+                    "left": 204,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "分",
+                "location": {
+                    "top": 275,
+                    "left": 204,
+                    "width": 33,
+                    "height": 23
+                }
+            },
+            {
+                "char": "齊",
+                "location": {
+                    "top": 302,
+                    "left": 204,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "其",
+                "location": {
+                    "top": 330,
+                    "left": 204,
+                    "width": 33,
+                    "height": 28
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "輕重短長取裁于吾之權度累",
+        "line_location": {
+            "top": 10,
+            "left": 163,
+            "width": 36,
+            "height": 349
+        },
+        "chars": [
+            {
+                "char": "輕",
+                "location": {
+                    "top": 10,
+                    "left": 164,
+                    "width": 34,
+                    "height": 31
+                }
+            },
+            {
+                "char": "重",
+                "location": {
+                    "top": 45,
+                    "left": 164,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "短",
+                "location": {
+                    "top": 74,
+                    "left": 164,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "長",
+                "location": {
+                    "top": 103,
+                    "left": 164,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "取",
+                "location": {
+                    "top": 132,
+                    "left": 164,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "裁",
+                "location": {
+                    "top": 161,
+                    "left": 164,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "于",
+                "location": {
+                    "top": 194,
+                    "left": 164,
+                    "width": 33,
+                    "height": 21
+                }
+            },
+            {
+                "char": "吾",
+                "location": {
+                    "top": 219,
+                    "left": 163,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 248,
+                    "left": 163,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "權",
+                "location": {
+                    "top": 277,
+                    "left": 163,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "度",
+                "location": {
+                    "top": 306,
+                    "left": 163,
+                    "width": 34,
+                    "height": 24
+                }
+            },
+            {
+                "char": "累",
+                "location": {
+                    "top": 334,
+                    "left": 163,
+                    "width": 34,
+                    "height": 26
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "黍杪忽罄無不冝而後可以明",
+        "line_location": {
+            "top": 9,
+            "left": 122,
+            "width": 36,
+            "height": 350
+        },
+        "chars": [
+            {
+                "char": "黍",
+                "location": {
+                    "top": 9,
+                    "left": 124,
+                    "width": 33,
+                    "height": 30
+                }
+            },
+            {
+                "char": "杪",
+                "location": {
+                    "top": 43,
+                    "left": 124,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "忽",
+                "location": {
+                    "top": 76,
+                    "left": 124,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "罄",
+                "location": {
+                    "top": 109,
+                    "left": 124,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "無",
+                "location": {
+                    "top": 137,
+                    "left": 124,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "不",
+                "location": {
+                    "top": 165,
+                    "left": 123,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "冝",
+                "location": {
+                    "top": 193,
+                    "left": 123,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "而",
+                "location": {
+                    "top": 222,
+                    "left": 123,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "後",
+                "location": {
+                    "top": 250,
+                    "left": 123,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "可",
+                "location": {
+                    "top": 278,
+                    "left": 123,
+                    "width": 32,
+                    "height": 25
+                }
+            },
+            {
+                "char": "以",
+                "location": {
+                    "top": 307,
+                    "left": 122,
+                    "width": 33,
+                    "height": 28
+                }
+            },
+            {
+                "char": "明",
+                "location": {
+                    "top": 339,
+                    "left": 122,
+                    "width": 33,
+                    "height": 21
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "體適用為通天地人之大儒有",
+        "line_location": {
+            "top": 9,
+            "left": 82,
+            "width": 36,
+            "height": 350
+        },
+        "chars": [
+            {
+                "char": "體",
+                "location": {
+                    "top": 9,
+                    "left": 84,
+                    "width": 33,
+                    "height": 30
+                }
+            },
+            {
+                "char": "適",
+                "location": {
+                    "top": 43,
+                    "left": 84,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "用",
+                "location": {
+                    "top": 72,
+                    "left": 84,
+                    "width": 33,
+                    "height": 28
+                }
+            },
+            {
+                "char": "為",
+                "location": {
+                    "top": 104,
+                    "left": 84,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "通",
+                "location": {
+                    "top": 132,
+                    "left": 83,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "天",
+                "location": {
+                    "top": 161,
+                    "left": 83,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "地",
+                "location": {
+                    "top": 194,
+                    "left": 83,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "人",
+                "location": {
+                    "top": 227,
+                    "left": 83,
+                    "width": 33,
+                    "height": 24
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 255,
+                    "left": 83,
+                    "width": 32,
+                    "height": 19
+                }
+            },
+            {
+                "char": "大",
+                "location": {
+                    "top": 278,
+                    "left": 82,
+                    "width": 33,
+                    "height": 25
+                }
+            },
+            {
+                "char": "儒",
+                "location": {
+                    "top": 307,
+                    "left": 82,
+                    "width": 33,
+                    "height": 29
+                }
+            },
+            {
+                "char": "有",
+                "location": {
+                    "top": 340,
+                    "left": 82,
+                    "width": 33,
+                    "height": 20
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "人曰我知輕重我知短長問之",
+        "line_location": {
+            "top": 10,
+            "left": 41,
+            "width": 36,
+            "height": 350
+        },
+        "chars": [
+            {
+                "char": "人",
+                "location": {
+                    "top": 10,
+                    "left": 43,
+                    "width": 34,
+                    "height": 30
+                }
+            },
+            {
+                "char": "曰",
+                "location": {
+                    "top": 45,
+                    "left": 43,
+                    "width": 34,
+                    "height": 24
+                }
+            },
+            {
+                "char": "我",
+                "location": {
+                    "top": 73,
+                    "left": 43,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "知",
+                "location": {
+                    "top": 103,
+                    "left": 42,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "輕",
+                "location": {
+                    "top": 132,
+                    "left": 42,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "重",
+                "location": {
+                    "top": 162,
+                    "left": 42,
+                    "width": 34,
+                    "height": 28
+                }
+            },
+            {
+                "char": "我",
+                "location": {
+                    "top": 194,
+                    "left": 42,
+                    "width": 34,
+                    "height": 26
+                }
+            },
+            {
+                "char": "知",
+                "location": {
+                    "top": 224,
+                    "left": 42,
+                    "width": 34,
+                    "height": 30
+                }
+            },
+            {
+                "char": "短",
+                "location": {
+                    "top": 258,
+                    "left": 42,
+                    "width": 33,
+                    "height": 20
+                }
+            },
+            {
+                "char": "長",
+                "location": {
+                    "top": 282,
+                    "left": 41,
+                    "width": 34,
+                    "height": 25
+                }
+            },
+            {
+                "char": "問",
+                "location": {
+                    "top": 311,
+                    "left": 41,
+                    "width": 34,
+                    "height": 26
+                }
+            },
+            {
+                "char": "之",
+                "location": {
+                    "top": 341,
+                    "left": 41,
+                    "width": 34,
+                    "height": 19
+                }
+            }
+        ]
+    },
+    {
+        "line_text": "以權度茫如也此無目而諍曰",
+        "line_location": {
+            "top": 9,
+            "left": 2,
+            "width": 34,
+            "height": 349
+        },
+        "chars": [
+            {
+                "char": "以",
+                "location": {
+                    "top": 9,
+                    "left": 3,
+                    "width": 32,
+                    "height": 30
+                }
+            },
+            {
+                "char": "權",
+                "location": {
+                    "top": 43,
+                    "left": 3,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "度",
+                "location": {
+                    "top": 71,
+                    "left": 3,
+                    "width": 32,
+                    "height": 28
+                }
+            },
+            {
+                "char": "茫",
+                "location": {
+                    "top": 103,
+                    "left": 3,
+                    "width": 32,
+                    "height": 28
+                }
+            },
+            {
+                "char": "如",
+                "location": {
+                    "top": 135,
+                    "left": 3,
+                    "width": 32,
+                    "height": 28
+                }
+            },
+            {
+                "char": "也",
+                "location": {
+                    "top": 167,
+                    "left": 3,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "此",
+                "location": {
+                    "top": 195,
+                    "left": 3,
+                    "width": 32,
+                    "height": 28
+                }
+            },
+            {
+                "char": "無",
+                "location": {
+                    "top": 227,
+                    "left": 2,
+                    "width": 32,
+                    "height": 27
+                }
+            },
+            {
+                "char": "目",
+                "location": {
+                    "top": 258,
+                    "left": 2,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "而",
+                "location": {
+                    "top": 286,
+                    "left": 2,
+                    "width": 32,
+                    "height": 24
+                }
+            },
+            {
+                "char": "諍",
+                "location": {
+                    "top": 314,
+                    "left": 2,
+                    "width": 32,
+                    "height": 23
+                }
+            },
+            {
+                "char": "曰",
+                "location": {
+                    "top": 341,
+                    "left": 2,
+                    "width": 32,
+                    "height": 18
+                }
+            }
+        ]
+    }
+]
